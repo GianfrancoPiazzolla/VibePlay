@@ -11,7 +11,7 @@
 [![Local-first](https://img.shields.io/badge/Local--first-100%25-22d3ee?style=for-the-badge&logo=shield&logoColor=white)](#-privacy--data)
 [![License MIT](https://img.shields.io/badge/License-MIT-34d399?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](#-license)
 
-[https://vibeplay-one.vercel.app/](https://vibeplay-one.vercel.app/)
+[https://vibeplay-xxx.vercel.app/](https://vibeplay-xxx.vercel.app/)
 
 </div>
 
