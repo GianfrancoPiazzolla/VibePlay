@@ -481,6 +481,7 @@ color:#aab4c5;font:800 10px ui-monospace,Menlo,monospace;letter-spacing:.1em;cur
 transition:border-color .12s,color .12s,background .12s;
 }
 .pick:hover{border-color:var(--accent);color:#c8faff;background:#0c181e}
+.pick-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .file-info{margin-top:7px;font:600 10px ui-monospace,Menlo,monospace;color:#5f6a7c;line-height:1.5;word-break:break-word}
 .file-info.has{color:#7dd3fc}
 .hint{margin:8px 0 0;font-size:10.5px;line-height:1.55;color:#6f7b8e}
@@ -717,9 +718,12 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 </div>
 <div id="localPane">
 <div class="field">
-<label>Audio file</label>
+<label>Audio file or folder</label>
+<div class="pick-row">
 <button class="pick" id="pickFile">CHOOSE FILE...</button>
-<div class="file-info" id="fileInfo">No file selected</div>
+<button class="pick" id="pickDir">CHOOSE FOLDER...</button>
+</div>
+<div class="file-info" id="fileInfo">No file or folder selected</div>
 </div>
 <p class="hint">The audio never leaves your device. Keep saving on for one-click access later, or turn it off to play the file only for this session.</p>
 </div>
@@ -930,6 +934,7 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 </div>
 <div id="toasts" aria-live="polite"></div>
 <input type="file" id="fallbackInput" accept="audio/*,.mp3,.m4a,.aac,.ogg,.oga,.opus,.wav,.flac,.webm,.aif,.aiff" hidden>
+<input type="file" id="dirFallbackInput" webkitdirectory directory multiple accept="audio/*,.mp3,.m4a,.aac,.ogg,.oga,.opus,.wav,.flac,.webm,.aif,.aiff" hidden>
 
 <script>
 "use strict";
@@ -2029,6 +2034,7 @@ segUrl:$("#segUrl"),
 localPane:$("#localPane"),
 urlPane:$("#urlPane"),
 pickFile:$("#pickFile"),
+pickDir:$("#pickDir"),
 fileInfo:$("#fileInfo"),
 addErr:$("#addErr"),
 renameModal:$("#renameModal"),
@@ -2038,6 +2044,7 @@ renameCancel:$("#renameCancel"),
 renameClose:$("#renameClose"),
 renameErr:$("#renameErr"),
 fallbackInput:$("#fallbackInput"),
+dirFallbackInput:$("#dirFallbackInput"),
 dropOverlay:$("#dropOverlay"),
 dropModal:$("#dropModal"),
 dropFiles:$("#dropFiles"),
@@ -3283,12 +3290,19 @@ useFallbackPicker().then(resolve,reject);
 let addKind="local";
 let pendingHandle=null;
 let pendingFile=null;
+let pendingDir=null;
 let pendingDuration=null;
 let nameEdited=false;
 
 function setPickedInfo(file){
+if(pendingDir){
+const count=pendingDir.tracks.length;
+els.fileInfo.textContent=count+(count===1?" track":" tracks")+" · "+pendingDir.name;
+els.fileInfo.classList.add("has");
+return;
+}
 if(!file){
-els.fileInfo.textContent="No file selected";
+els.fileInfo.textContent="No file or folder selected";
 els.fileInfo.classList.remove("has");
 return;
 }
@@ -3313,6 +3327,7 @@ function openAdd(){
 addKind="local";
 pendingHandle=null;
 pendingFile=null;
+pendingDir=null;
 pendingDuration=null;
 nameEdited=false;
 els.srcName.value="";
@@ -3352,6 +3367,7 @@ els.addErr.hidden=false;
 async function chooseLocalFile(){
 try{
 const picked=await pickFile();
+pendingDir=null;
 pendingHandle=picked.handle||null;
 pendingFile=picked.file||null;
 pendingDuration=null;
@@ -3370,6 +3386,56 @@ setPickedInfo(pendingFile);
 }catch(e){
 if(e&&e.name==="AbortError")return;
 toast("Could not open the file picker");
+}
+}
+
+let pickingDirResolve=null;
+let pickingDirReject=null;
+function useFallbackDirPicker(){
+return new Promise((resolve,reject)=>{
+pickingDirResolve=resolve;
+pickingDirReject=reject;
+els.dirFallbackInput.value="";
+els.dirFallbackInput.click();
+});
+}
+async function pickDirectory(){
+if(window.showDirectoryPicker){
+try{
+const handle=await window.showDirectoryPicker({mode:"read"});
+if(!(await ensurePermission(handle)))throw new Error("denied");
+return {handle,name:handle.name,tracks:sortTracks(await readDirectoryTracks(handle))};
+}catch(err){
+if(err&&(err.name==="AbortError"||err.message==="denied"))throw err;
+}
+}
+const picked=await useFallbackDirPicker();
+const files=Array.from(picked.files||[]);
+const tracks=sortTracks(files.filter(isAudioFile).map(file=>({file,path:file.webkitRelativePath||file.name,name:file.name})));
+const first=tracks[0];
+const name=first?String(first.path||"").split("/")[0]:"Folder";
+return {handle:null,name:name||"Folder",tracks};
+}
+async function chooseLocalFolder(){
+try{
+const picked=await pickDirectory();
+if(!picked.tracks.length){
+toast("No audio files in this folder");
+return;
+}
+pendingDir={handle:picked.handle,name:picked.name||"Folder",tracks:picked.tracks};
+pendingHandle=null;
+pendingFile=null;
+pendingDuration=null;
+setPickedInfo(null);
+if(!nameEdited)els.srcName.value=pendingDir.name;
+}catch(e){
+if(e&&e.name==="AbortError")return;
+if(e&&e.message==="denied"){
+toast("Folder access denied");
+return;
+}
+toast("Could not open the folder picker");
 }
 }
 
@@ -3403,8 +3469,41 @@ toast("Playing without saving");
 }
 return;
 }
+if(pendingDir){
+const tracks=pendingDir.tracks;
+if(!tracks.length){
+showAddErr("No audio files found in that folder.");
+return;
+}
+const name=els.srcName.value.trim()||pendingDir.name;
+if(!name){
+showAddErr("Give this source a reference name.");
+els.srcName.focus();
+return;
+}
+const id=uid();
+const src={id,name,kind:"dir",trackCount:tracks.length,duration:null,saved:save,addedAt:Date.now()};
+const payload=pendingDir.handle||tracks.map(track=>({file:track.file,path:track.path}));
+handles.set(id,payload);
+dirCache.set(id,tracks);
+let stored=true;
+if(save){
+try{await idbPut(id,payload);}catch(e){stored=false;}
+}
+state.sources.push(src);
+if(save)saveSources();
+closeAdd();
+render();
+if(save){
+toast(stored?"Folder saved":"Folder saved for this session only");
+}else{
+playSource(id,true);
+toast("Playing without saving");
+}
+return;
+}
 if(!pendingHandle&&!pendingFile){
-showAddErr("Choose an audio file.");
+showAddErr("Choose an audio file or a folder.");
 return;
 }
 let file=pendingFile;
@@ -4178,6 +4277,7 @@ if(event.target===els.dropModal)closeDropModal();
 els.segLocal.addEventListener("click",()=>setAddKind("local"));
 els.segUrl.addEventListener("click",()=>setAddKind("url"));
 els.pickFile.addEventListener("click",chooseLocalFile);
+els.pickDir.addEventListener("click",chooseLocalFolder);
 els.addModal.addEventListener("click",event=>{
 if(event.target===els.addModal)closeAdd();
 });
@@ -4229,6 +4329,26 @@ if(pickingReject){
 const reject=pickingReject;
 pickingResolve=null;
 pickingReject=null;
+const err=new Error("Cancelled");
+err.name="AbortError";
+reject(err);
+}
+});
+els.dirFallbackInput.addEventListener("change",()=>{
+const files=els.dirFallbackInput.files?Array.from(els.dirFallbackInput.files):[];
+if(files.length&&pickingDirResolve){
+const resolve=pickingDirResolve;
+pickingDirResolve=null;
+pickingDirReject=null;
+resolve({files});
+}
+els.dirFallbackInput.value="";
+});
+els.dirFallbackInput.addEventListener("cancel",()=>{
+if(pickingDirReject){
+const reject=pickingDirReject;
+pickingDirResolve=null;
+pickingDirReject=null;
 const err=new Error("Cancelled");
 err.name="AbortError";
 reject(err);
