@@ -11,7 +11,7 @@
 [![Local-first](https://img.shields.io/badge/Local--first-100%25-22d3ee?style=for-the-badge&logo=shield&logoColor=white)](#-privacy--data)
 [![License MIT](https://img.shields.io/badge/License-MIT-34d399?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](#-license)
 
-[https://vibeplay-psi.vercel.app/](https://vibeplay-psi.vercel.app/)
+[https://vibeplay-one.vercel.app/](https://vibeplay-one.vercel.app/)
 
 </div>
 
@@ -54,7 +54,7 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 | 🎧 Audiobook need | ✅ How VibePlay answers it |
 |---|---|
 | ⏳ **Never lose your place** | Resume points are stored per track and offered again when you reopen a local file or folder book. |
-| 🔖 **Mark chapters, quotes and notes** | Named bookmarks per track, listed in a dedicated panel and drawn on the seekbar with tooltips. |
+| 🔖 **Mark chapters, quotes and notes** | Named bookmarks per track with optional notes (up to 500 characters), listed in a dedicated panel and drawn on the seekbar with tooltips. |
 | 📚 **Books split into many files** | Drop the whole book folder 📁: tracks are scanned recursively, sorted by name and advanced automatically. |
 | 🚫 **Skip intros, credits and samples** | Exclude any source from the playlist with one click 👁️‍🗨️ while keeping it in the library. |
 | 🎚️ **Slow or fast narrators** | Playback speed from **0.10× to 10×**, saved for the next session. |
@@ -85,13 +85,13 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 | ↩️ | **Undo remove** | Removing a source shows a toast with an **UNDO** action. |
 | 🎚️ | **Playback speed** | Fine-grained range from **0.10× to 10×**, saved between sessions. |
 | ⏲️ | **Sleep timer** | Stop playback after 1–720 minutes, with a live countdown pill. |
-| 🔖 | **Bookmarks** | Named markers per track, shown on the seekbar and in a dedicated list. |
+| 🔖 | **Bookmarks & notes** | Named markers per track with editable notes (500 characters), shown on the seekbar and in a dedicated list. |
 | ⏯️ | **Resume points** | Every local track remembers where you stopped and offers to resume. |
 | 📊 | **Waveform & spectrum** | Decoded waveform for local tracks and a live spectrum analyzer for playing audio. |
 | 🎛️ | **Seekbar intelligence** | Hover markers for bookmarks and resume points, plus ±30 s jump buttons. |
 | 🖥️ | **Media Session** | Track metadata and OS media keys where supported. |
 | 📦 | **Backup & restore** | Export/import the whole library as JSON, with **merge** or **overwrite**. |
-| 🌙 | **Polished dark UI** | Responsive layout, vinyl disc animation, toasts, reduced-motion support. |
+| 🌙 | **Polished dark UI** | Responsive layout, OLED-style digital display, toasts, reduced-motion support. |
 | 📴 | **Service worker** | Caches the app shell for offline use (see the icon note below). |
 
 ---
@@ -99,8 +99,9 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 ## 🎚️ The Player
 
 ```
-💿 spinning disc  →  play / pause on click
-🖼️  cover initials →  generated colour gradient per source name
+🖥️  digital display →  title marquee · state LED · source name · track counter
+📊  readouts       →  format · bitrate · file size · shuffle · repeat · speed · sleep · volume
+⏯️  status chip    →  play / pause by clicking the LED chip
 📈  waveform       →  local tracks · 🌈 live spectrum  →  analysers
 🎯  seekbar        →  bookmarks 🔖 and resume points 🟢 markers
 ⏱️  times          →  current · ±30 s · duration / LIVE
@@ -196,7 +197,7 @@ Open **DATA** 🗄️ in the header to:
   "exportedAt": "2026-01-01T00:00:00.000Z",
   "settings": { "volume": 0.8, "shuffle": false, "repeat": "off", "rate": 1 },
   "sources": [{ "id": "…", "name": "Late night set", "kind": "url", "url": "https://…" }],
-  "bookmarks": { "url:…": [{ "id": "…", "time": 42.5, "name": "Chapter 2" }] },
+  "bookmarks": { "url:…": [{ "id": "…", "time": 42.5, "name": "Chapter 2", "notes": "Re-listen to this passage" }] },
   "resumePoints": { "local:…": 128.4 }
 }
 ```
