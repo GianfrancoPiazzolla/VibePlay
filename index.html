@@ -234,44 +234,72 @@ padding:3px 9px;font:800 8.5px ui-monospace,Menlo,monospace;letter-spacing:.12em
 .kind.live{color:#fca5a5;border-color:#5b2626;background:#2a1212}
 .kind.temp{color:#fbbf24;border-color:#4a3a1a;background:#221b0c}
 .kind.folder{color:#c4b5fd;border-color:#3b2f5c;background:#171229}
-.disc-wrap{position:relative;margin:16px 0 14px;flex:none;display:grid;place-items:center}
-.disc-wrap::before{
-content:"";position:absolute;inset:-26px;border-radius:50%;filter:blur(16px);pointer-events:none;
-background:radial-gradient(circle,#22d3ee30,transparent 66%);
+.display{
+position:relative;width:100%;margin:14px 0 12px;padding:12px 14px 10px;flex:none;overflow:hidden;
+border-radius:15px;border:1px solid #1d3944;
+background:linear-gradient(180deg,#071116 0%,#060c11 52%,#05090d 100%);
+box-shadow:inset 0 1px 0 #ffffff0d,inset 0 0 70px #22d3ee12,0 20px 44px #00000080,0 0 0 1px #00000066;
+font-variant-numeric:tabular-nums;
 }
-.disc{
-position:relative;width:196px;height:196px;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+.display::before{
+content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
 background:
-repeating-radial-gradient(circle at 50% 50%,#161a21 0 1.5px,#0c0e12 1.5px 3px),
-conic-gradient(from 0deg,#1c212a,#0c0e12 22%,#1c212a 47%,#0c0e12 72%,#1c212a);
-box-shadow:0 24px 54px #000000aa,inset 0 0 0 1px #ffffff14,0 0 0 6px #0c0e12,0 0 0 7px #262d38;
-animation:spin 8s linear infinite;animation-play-state:paused;
+repeating-linear-gradient(0deg,#ffffff06 0 1px,transparent 1px 3px),
+radial-gradient(120% 100% at 50% -30%,#22d3ee1f,transparent 62%);
 }
-.is-playing .disc{animation-play-state:running}
-.disc::after{
-content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;
-background:linear-gradient(125deg,#ffffff1c 0%,transparent 34%,transparent 66%,#22d3ee12 100%);
+.display::after{
+content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;
+box-shadow:inset 0 0 0 1px #22d3ee0f,inset 0 -18px 30px #00000066;
 }
-.disc-label{
-width:74px;height:74px;border-radius:50%;position:relative;z-index:1;display:flex;align-items:flex-start;
-justify-content:center;padding-top:13px;
-background:linear-gradient(135deg,#67e8f9,#0891b2);
-box-shadow:inset 0 0 0 3px #0000004d,0 0 20px #22d3ee40;
-font:800 17px/1 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#04141a;
+.display>*{position:relative;z-index:1}
+.d-top{display:flex;align-items:center;gap:8px;min-width:0}
+.d-src{
+flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+font:800 9.5px ui-monospace,Menlo,monospace;letter-spacing:.16em;text-transform:uppercase;color:#7fe7f5;
+text-shadow:0 0 10px #22d3ee40;
 }
-.disc-label::after{
-content:"";position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;
-background:#0b0d11;border:1px solid #ffffff3d;
+.d-pos{flex:none;font:800 9.5px ui-monospace,Menlo,monospace;letter-spacing:.1em;color:#5d7686}
+.d-state{
+display:inline-flex;align-items:center;gap:6px;flex:none;cursor:pointer;padding:3px 8px;
+border-radius:999px;border:1px solid #1b3a44;background:#07171c;color:#6adfee;
+font:800 8.5px ui-monospace,Menlo,monospace;letter-spacing:.14em;
+transition:border-color .15s,color .15s,background .15s,box-shadow .15s;
 }
-@keyframes spin{to{transform:rotate(360deg)}}
-.track{
-margin:0;max-width:100%;font-size:22px;font-weight:750;letter-spacing:-.01em;color:#f2f6fc;
-text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:1;
+.d-state i{width:6px;height:6px;border-radius:50%;background:#27454f;flex:none;transition:background .15s,box-shadow .15s}
+.d-state:hover{border-color:#2c626f;color:#a5f3fc}
+.d-state.on{color:#c8fbff;border-color:#22d3ee80;background:#0a2229;box-shadow:0 0 16px #22d3ee38}
+.d-state.on i{background:#22d3ee;box-shadow:0 0 7px #22d3ee,0 0 14px #22d3ee80}
+.d-state.live{color:#fecaca;border-color:#5b2626;background:#210f11}
+.d-state.live i{background:#f87171;box-shadow:0 0 8px #f87171}
+.d-title{
+margin:9px 0 0;width:100%;overflow:hidden;
+font-size:24px;font-weight:800;letter-spacing:-.015em;line-height:1.16;color:#f0fdff;
+text-shadow:0 0 22px #22d3ee2e;
 }
-.track-sub{
-margin:4px 0 0;max-width:100%;font-size:11px;color:var(--dim);text-align:center;
-white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:1;
+.d-title span{display:inline-block;white-space:nowrap;padding-right:1px;will-change:transform}
+.d-title.scrolling span{animation:dmarq var(--marq-dur,14s) linear infinite alternate}
+@keyframes dmarq{0%,10%{transform:translateX(0)}90%,100%{transform:translateX(calc(-1 * var(--marq,0px)))}}
+.d-sub{
+margin:3px 0 0;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+font:600 10.5px ui-monospace,Menlo,monospace;letter-spacing:.02em;color:#7f93a4;
 }
+.d-leds{
+display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:9px;padding-top:8px;
+border-top:1px solid #ffffff0f;
+}
+.chip,.led{
+display:inline-flex;align-items:center;gap:5px;padding:2px 6px;border-radius:4px;white-space:nowrap;
+border:1px solid #16262e;background:#071116;font:800 8px ui-monospace,Menlo,monospace;letter-spacing:.1em;
+color:#57707d;
+}
+.chip{color:#7b93a2}
+.led::before{content:"";width:4px;height:4px;border-radius:50%;background:#22343d;flex:none}
+.led.on{color:#a5f3fc;border-color:#1d4a55;background:#0a2028;box-shadow:0 0 10px #22d3ee1f}
+.led.on::before{background:#22d3ee;box-shadow:0 0 6px #22d3ee}
+.led.warn.on{color:#fde68a;border-color:#4a3a1a;background:#1d170a}
+.led.warn.on::before{background:#fbbf24;box-shadow:0 0 6px #fbbf24}
+.led.mute.on{color:#fca5a5;border-color:#4a2424;background:#1b0f10}
+.led.mute.on::before{background:#f87171;box-shadow:0 0 6px #f87171}
 .seek-wrap{width:100%;margin-top:16px;flex:none;position:relative}
 #seek{
 display:block;width:100%;height:58px;border-radius:11px;border:1px solid var(--line);
@@ -290,9 +318,10 @@ line-height:1.35;pointer-events:none;white-space:normal;overflow-wrap:anywhere;
 .seek-tip.resume{border-color:#1f6b52}
 .seek-tip.resume b{color:#34d399}
 .times{
-width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px;
+width:100%;display:flex;justify-content:flex-start;align-items:center;gap:8px;margin-top:6px;
 font:700 10.5px ui-monospace,Menlo,monospace;color:#8b95a7;font-variant-numeric:tabular-nums;
 }
+.d-rem{color:#5d7686;margin-right:auto}
 .jump-controls{display:flex;align-items:center;gap:6px}
 .jump{
 font:800 9.5px ui-monospace,Menlo,monospace;letter-spacing:.04em;color:#9aa6b8;
@@ -350,8 +379,8 @@ width:14px;height:14px;border-radius:50%;background:#67e8f9;border:1px solid #0e
 box-shadow:0 0 10px #22d3ee66;cursor:pointer;
 }
 #viz{
-display:block;width:100%;height:44px;margin-top:13px;border-radius:10px;border:1px solid var(--line);
-background:#0a0c10;flex:none;opacity:.95;
+display:block;width:100%;height:58px;margin-top:9px;border-radius:9px;border:1px solid #12232b;
+background:#04090d;flex:none;
 }
 .foot{
 flex:none;display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;
@@ -407,8 +436,24 @@ transition:border-color .12s,background .12s,box-shadow .12s;
 }
 .bm-name:hover{border-color:#2b3441;background:#0d1015}
 .bm-name:focus{border-color:var(--accent);background:#0d1015;box-shadow:0 0 0 3px #22d3ee1a}
+.bm-notes{
+width:100%;min-height:54px;padding:8px 10px;border-radius:9px;border:1px solid var(--line);
+background:#0d1015;color:var(--text);font-family:inherit;font-size:11.5px;line-height:1.5;
+resize:vertical;outline:none;transition:border-color .12s,box-shadow .12s;
+}
+.bm-notes::placeholder{color:#5c6779}
+.bm-notes:focus{border-color:var(--accent);box-shadow:0 0 0 3px #22d3ee1a}
 .bm-list{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow:auto}
-.bm-item{display:flex;align-items:center;gap:6px}
+.bm-item{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px}
+.bm-item .bm-jump,.bm-item .bm-del{margin-top:2px}
+.bm-note{
+flex:1 0 100%;width:100%;min-height:38px;margin-top:2px;padding:4px 8px;border-radius:6px;
+border:1px solid transparent;background:transparent;color:#9aa6b8;font-family:inherit;font-size:10.5px;
+line-height:1.45;resize:vertical;outline:none;transition:border-color .12s,background .12s,box-shadow .12s;
+}
+.bm-note::placeholder{color:#566173}
+.bm-note:hover{border-color:#2b3441;background:#0d1015}
+.bm-note:focus{border-color:var(--accent);background:#0d1015;box-shadow:0 0 0 3px #22d3ee1a}
 .bm-jump{
 flex:none;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 10px;border:1px solid var(--line);
 border-radius:9px;background:#0d1015;color:#cfd6e2;cursor:pointer;text-align:left;
@@ -568,8 +613,8 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 .player{order:-1;overflow:visible;padding:16px}
 .library{max-height:none}
 .list{max-height:340px}
-.disc{width:170px;height:170px}
-.disc-label{width:66px;height:66px;padding-top:11px;font-size:15px}
+.display{padding:10px 11px 9px;margin:12px 0 10px}
+.d-title{font-size:21px}
 .foot{display:none}
 }
 @media(max-width:560px){
@@ -577,16 +622,16 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 .top{padding:9px 10px}
 .btn.primary{padding:8px 10px;font-size:10px}
 .player{padding:14px 12px}
-.track{font-size:18px}
-.seek-wrap{margin-top:13px}
-#seek{height:48px}
+.d-title{font-size:18px}
+.seek-wrap{margin-top:9px}
+#seek{height:46px}
 .transport{gap:11px}
 .tr{width:38px;height:38px}
 .tr.play-big{width:56px;height:56px}
 .jump{padding:4px 7px;font-size:9px}
 .bm-btn{width:26px;height:26px}
 .volume{max-width:100%}
-#viz{height:36px}
+#viz{height:46px}
 .src-actions{opacity:1;pointer-events:auto;background:linear-gradient(90deg,#14171df2,#14171d 30%)}
 .src-dur{display:none}
 .modal-card{max-height:94vh}
@@ -595,7 +640,7 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 .about-btn{padding:8px 9px}
 }
 @media(prefers-reduced-motion:reduce){
-.disc{animation:none}
+.d-title.scrolling span{animation:none}
 .eq b{animation:none;height:9px}
 .toast,.modal-card{animation:none}
 }
@@ -644,7 +689,6 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <div class="now-head">
 <span class="now-label">NOW PLAYING</span>
 <div class="now-tools">
-<span class="kind" id="kind">IDLE</span>
 <button class="icon-btn sleep-btn" id="sleepBtn" type="button" title="Sleep timer" aria-label="Sleep timer" disabled>
 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.6 2M9 3h6"/></svg>
 </button>
@@ -654,13 +698,17 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 </button>
 </div>
 </div>
-<div class="disc-wrap">
-<div class="disc" id="disc" role="button" tabindex="0" aria-label="Play or pause">
-<div class="disc-label" id="discLabel">VP</div>
+<div class="display" id="display" role="group" aria-label="Now playing display">
+<div class="d-top">
+<span class="d-src" id="dSrc">VIBEPLAY</span>
+<span class="kind" id="kind">IDLE</span>
+<span class="d-pos" id="dPos">&mdash;</span>
+<button class="d-state" id="dState" type="button" aria-label="Play or pause">
+<i aria-hidden="true"></i><span id="dStateText">STANDBY</span>
+</button>
 </div>
-</div>
-<h2 class="track" id="track">Nothing playing</h2>
-<p class="track-sub" id="trackSub">Add a local file or a stream to begin</p>
+<div class="d-title"><span id="track">Nothing playing</span></div>
+<p class="d-sub" id="trackSub">Add a local file or a stream to begin</p>
 <canvas id="viz" aria-hidden="true"></canvas>
 <div class="seek-wrap">
 <canvas id="seek" aria-label="Seek position"></canvas>
@@ -668,11 +716,24 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 </div>
 <div class="times">
 <span id="tCur">0:00</span>
+<span class="d-rem" id="dRem">&minus;0:00</span>
 <div class="jump-controls">
 <button class="jump" id="back30" type="button" title="Back 30 seconds" aria-label="Back 30 seconds" disabled>&minus;30s</button>
 <button class="jump" id="fwd30" type="button" title="Forward 30 seconds" aria-label="Forward 30 seconds" disabled>+30s</button>
 </div>
 <span id="tDur">--:--</span>
+</div>
+<div class="d-leds">
+<span class="chip" id="dFmt">&mdash;</span>
+<span class="chip" id="dBits">&mdash;</span>
+<span class="chip" id="dSize">&mdash;</span>
+<span class="led" id="ledShuffle">SHUF</span>
+<span class="led" id="ledRepeat">RPT</span>
+<span class="led" id="ledSpeed">1&times;</span>
+<span class="led warn" id="ledSleep">SLEEP</span>
+<span class="led" id="ledVol">VOL 80%</span>
+<span class="led" id="ledBm">BM 0</span>
+</div>
 </div>
 <div class="sleep-pill" id="sleepPill" hidden>
 <span>SLEEP</span><b id="sleepLeft">30:00</b><button class="sleep-pill-x" id="sleepCancel" type="button" aria-label="Cancel sleep timer" title="Cancel sleep timer">&times;</button>
@@ -800,9 +861,13 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <label for="bmName">Bookmark name</label>
 <input id="bmName" type="text" maxlength="80" placeholder="Optional, e.g. Chapter 3" autocomplete="off">
 </div>
+<div class="field bm-new-field">
+<label for="bmNotes">Notes</label>
+<textarea id="bmNotes" class="bm-notes" maxlength="500" rows="2" placeholder="Optional notes, quotes or page references"></textarea>
+</div>
 <button class="btn primary bm-add" id="bmAdd" type="button">ADD BOOKMARK</button>
 <div class="bm-list" id="bmList"></div>
-<p class="hint">Bookmarks are stored in this browser and remain available after a reload for saved sources. Their names appear in this list and in the seekbar tooltip. Click a name to edit it.</p>
+<p class="hint">Bookmarks are stored in this browser and remain available after a reload for saved sources. Names and notes (up to 500 characters) appear in this list, are included in backups, and can be edited by clicking them.</p>
 </div>
 <div class="modal-foot"><button class="btn" id="bookmarksDone" type="button">CLOSE</button></div>
 </div>
@@ -1002,19 +1067,6 @@ return "";
 }
 };
 const stripExt=n=>String(n||"").replace(/\.[^.]+$/,"").trim();
-const initials=n=>{
-const words=String(n||"").trim().split(/\s+/).filter(Boolean);
-if(!words.length)return "VP";
-if(words.length===1)return words[0].slice(0,2).toUpperCase();
-return (words[0][0]+words[1][0]).toUpperCase();
-};
-const artColors=n=>{
-let h=0;
-const s=String(n||"VibePlay");
-for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;
-const hue=h%360;
-return ["hsl("+hue+" 74% 64%)","hsl("+((hue+58)%360)+" 66% 42%)"];
-};
 const sliderFill=v=>{
 const p=Math.round(clamp(v,0,1)*100);
 return p+"%";
@@ -1274,7 +1326,7 @@ return detail&&detail!==src.name?src.name+" · "+detail:src.name;
 function renderBookmarks(){
 const key=activeTrackKey;
 const list=key&&bookmarks[key]?bookmarks[key]:[];
-if(bmDraftKey!==key){bmDraftKey=key;els.bmName.value="";}
+if(bmDraftKey!==key){bmDraftKey=key;els.bmName.value="";els.bmNotes.value="";}
 els.bmTrack.textContent=key?bookmarkTrackLabel():"No track selected";
 els.bmTrack.title=els.bmTrack.textContent;
 els.bmAdd.disabled=!canAddBookmark();
@@ -1287,8 +1339,9 @@ return;
 els.bmList.innerHTML=list.map(b=>{
 const time=fmtTime(b.time);
 const name=bookmarkName(b);
+const notes=typeof b.notes==="string"?b.notes:"";
 const label="Jump to "+name+" at "+time;
-return '<div class="bm-item"><div class="bm-field"><input class="bm-name" type="text" maxlength="80" data-bmname="'+esc(b.id)+'" value="'+esc(typeof b.name==="string"?b.name:"")+'" placeholder="Bookmark name" title="Edit bookmark name" aria-label="'+esc("Name for bookmark at "+time)+'"><span class="bm-date">'+esc(bookmarkDate(b.createdAt))+'</span></div><button type="button" class="bm-jump" data-bm="'+esc(b.id)+'" title="'+esc(label)+'" aria-label="'+esc(label)+'"><span class="bm-time">'+esc(time)+'</span><span class="bm-go">PLAY</span></button><button type="button" class="icon-btn bm-del" data-bmdel="'+esc(b.id)+'" title="Delete bookmark" aria-label="Delete bookmark">'+ICON.trash+'</button></div>';
+return '<div class="bm-item"><div class="bm-field"><input class="bm-name" type="text" maxlength="80" data-bmname="'+esc(b.id)+'" value="'+esc(typeof b.name==="string"?b.name:"")+'" placeholder="Bookmark name" title="Edit bookmark name" aria-label="'+esc("Name for bookmark at "+time)+'"><span class="bm-date">'+esc(bookmarkDate(b.createdAt))+'</span></div><button type="button" class="bm-jump" data-bm="'+esc(b.id)+'" title="'+esc(label)+'" aria-label="'+esc(label)+'"><span class="bm-time">'+esc(time)+'</span><span class="bm-go">PLAY</span></button><button type="button" class="icon-btn bm-del" data-bmdel="'+esc(b.id)+'" title="Delete bookmark" aria-label="Delete bookmark">'+ICON.trash+'</button><textarea class="bm-note" rows="2" maxlength="500" data-bmnotes="'+esc(b.id)+'" placeholder="Add notes..." title="Edit bookmark notes (up to 500 characters)" aria-label="'+esc("Notes for bookmark at "+time)+'">'+esc(notes)+'</textarea></div>';
 }).join("");
 updateBookmarkButton();
 }
@@ -1322,9 +1375,11 @@ toast("Bookmark already exists");
 return;
 }
 const typed=els.bmName.value.trim().slice(0,80);
-list.push({id:uid(),time,name:typed||"Bookmark "+fmtTime(time),createdAt:Date.now()});
+const noteText=els.bmNotes.value.trim().slice(0,500);
+list.push({id:uid(),time,name:typed||"Bookmark "+fmtTime(time),notes:noteText,createdAt:Date.now()});
 list.sort((a,b)=>a.time-b.time);
 els.bmName.value="";
+els.bmNotes.value="";
 saveBookmarks();
 renderBookmarks();
 toast("Bookmark added at "+fmtTime(time));
@@ -1375,6 +1430,8 @@ els.sleepBtn.classList.remove("on");
 els.sleepBtn.title="Sleep timer";
 els.sleepBtn.setAttribute("aria-label","Sleep timer");
 }
+setText(els.ledSleep,active?"SLEEP "+fmtTime(Math.ceil(left/1000)):"SLEEP");
+els.ledSleep.classList.toggle("on",active);
 if(!els.sleepModal.hidden){
 const status=active?"Timer running: "+fmtTime(Math.ceil(left/1000))+" left. Set a new duration or cancel it.":"Set how many minutes should pass before playback stops.";
 if(els.sleepStatus.textContent!==status)els.sleepStatus.textContent=status;
@@ -1502,7 +1559,7 @@ if(!raw||typeof raw!=="object")return {};
 const out={};
 for(const [key,list] of Object.entries(raw)){
 if(!Array.isArray(list))continue;
-const clean=list.filter(b=>b&&typeof b.id==="string"&&isFinite(b.time)&&b.time>=0).map(b=>({id:b.id,time:+b.time,name:typeof b.name==="string"?b.name.slice(0,80):"",createdAt:+b.createdAt||Date.now()})).sort((a,b)=>a.time-b.time);
+const clean=list.filter(b=>b&&typeof b.id==="string"&&isFinite(b.time)&&b.time>=0).map(b=>({id:b.id,time:+b.time,name:typeof b.name==="string"?b.name.slice(0,80):"",notes:typeof b.notes==="string"?b.notes.slice(0,500):"",createdAt:+b.createdAt||Date.now()})).sort((a,b)=>a.time-b.time);
 if(clean.length)out[key]=clean;
 }
 return out;
@@ -1585,7 +1642,7 @@ const ids=new Set(sources.map(s=>s.id));
 const outBookmarks={};
 for(const [key,list] of Object.entries(bookmarks)){
 if(!ids.has(key.split(":")[1])||!Array.isArray(list))continue;
-const clean=list.filter(b=>b&&typeof b.id==="string"&&isFinite(b.time)&&b.time>=0).map(b=>({id:b.id,time:+b.time,name:typeof b.name==="string"?b.name.slice(0,80):"",createdAt:+b.createdAt||Date.now()}));
+const clean=list.filter(b=>b&&typeof b.id==="string"&&isFinite(b.time)&&b.time>=0).map(b=>({id:b.id,time:+b.time,name:typeof b.name==="string"?b.name.slice(0,80):"",notes:typeof b.notes==="string"?b.notes.slice(0,500):"",createdAt:+b.createdAt||Date.now()}));
 if(clean.length)outBookmarks[key]=clean;
 }
 const outResume={};
@@ -1659,7 +1716,7 @@ for(const b of list){
 if(!b||typeof b.id!=="string"||!isFinite(b.time)||b.time<0)continue;
 const time=+b.time;
 if(clean.some(x=>x.id===b.id||Math.abs(x.time-time)<0.5))continue;
-clean.push({id:b.id,time,name:typeof b.name==="string"?b.name.slice(0,80):"",createdAt:+b.createdAt||Date.now()});
+clean.push({id:b.id,time,name:typeof b.name==="string"?b.name.slice(0,80):"",notes:typeof b.notes==="string"?b.notes.slice(0,500):"",createdAt:+b.createdAt||Date.now()});
 }
 if(clean.length)out[key]=clean.sort((a,b)=>a.time-b.time);
 }
@@ -1962,8 +2019,21 @@ srcTemp:$("#srcTemp"),
 track:$("#track"),
 trackSub:$("#trackSub"),
 kind:$("#kind"),
-disc:$("#disc"),
-discLabel:$("#discLabel"),
+display:$("#display"),
+dSrc:$("#dSrc"),
+dPos:$("#dPos"),
+dState:$("#dState"),
+dStateText:$("#dStateText"),
+dRem:$("#dRem"),
+dFmt:$("#dFmt"),
+dBits:$("#dBits"),
+dSize:$("#dSize"),
+ledShuffle:$("#ledShuffle"),
+ledRepeat:$("#ledRepeat"),
+ledSpeed:$("#ledSpeed"),
+ledSleep:$("#ledSleep"),
+ledVol:$("#ledVol"),
+ledBm:$("#ledBm"),
 seek:$("#seek"),
 tCur:$("#tCur"),
 tDur:$("#tDur"),
@@ -1975,6 +2045,7 @@ bookmarksClose:$("#bookmarksClose"),
 bookmarksDone:$("#bookmarksDone"),
 bmTrack:$("#bmTrack"),
 bmName:$("#bmName"),
+bmNotes:$("#bmNotes"),
 bmAdd:$("#bmAdd"),
 bmList:$("#bmList"),
 seekTip:$("#seekTip"),
@@ -2213,59 +2284,138 @@ if(!dir||dir.sourceId!==src.id||dir.index<0)return null;
 return dir.tracks[dir.index]||null;
 }
 
+function setText(el,text){
+if(el&&el.textContent!==text)el.textContent=text;
+}
+function syncMarquee(){
+const el=els.track;
+const box=el&&el.parentElement;
+if(!el||!box)return;
+box.classList.remove("scrolling");
+box.style.removeProperty("--marq");
+box.style.removeProperty("--marq-dur");
+const shift=el.scrollWidth-box.clientWidth;
+if(shift>6){
+box.style.setProperty("--marq",shift+"px");
+box.style.setProperty("--marq-dur",Math.max(7,Math.round(shift/28))+"s");
+box.classList.add("scrolling");
+}
+}
+function fileFormatLabel(name){
+const ext=(String(name||"").split(".").pop()||"").toLowerCase();
+const map={mp3:"MP3",m4a:"M4A",aac:"AAC",ogg:"OGG",oga:"OGG",opus:"OPUS",wav:"WAV",flac:"FLAC",webm:"WEBM",aif:"AIFF",aiff:"AIFF"};
+return map[ext]||"AUDIO";
+}
+function sourceSize(src,dirTrack){
+if(!src)return 0;
+if(src.kind==="dir")return dirTrack&&dirTrack.file?dirTrack.file.size:0;
+if(src.kind==="local")return src.fileSize||0;
+return 0;
+}
+function fmtBitrate(bytes,duration){
+if(!bytes||!duration||!isFinite(duration)||duration<=0)return "";
+const kbps=Math.round(bytes*8/duration/1000);
+return kbps>0?"\u2248"+kbps+" kbps":"";
+}
+function displayPosition(src){
+if(!src)return "\u2014";
+if(src.kind!=="dir")return "SINGLE";
+const dir=state.dir&&state.dir.sourceId===src.id?state.dir:null;
+const total=dir&&dir.tracks.length?dir.tracks.length:(src.trackCount||0);
+if(dir&&dir.index>=0&&total)return String(dir.index+1).padStart(2,"0")+" / "+String(total).padStart(2,"0");
+return total?String(total).padStart(2,"0")+" TRK":"\u2014";
+}
+function displayBookmarkCount(src){
+const key=src?currentSeekKey(src):null;
+const list=key?bookmarks[key]:null;
+return list?list.length:0;
+}
+function renderDisplay(){
+const src=currentSource();
+const dirTrack=src?currentDirTrack(src):null;
+const playing=!!state.playing&&!!audio;
+const duration=seekDuration();
+setText(els.dSrc,src?src.name:"VIBEPLAY");
+els.dSrc.title=src?src.name:"VibePlay";
+setText(els.dPos,displayPosition(src));
+setText(els.dStateText,!src?"STANDBY":state.live?"LIVE":playing?"PLAYING":audio?"PAUSED":"READY");
+els.dState.classList.toggle("on",playing);
+els.dState.classList.toggle("live",!!state.live);
+els.dState.setAttribute("aria-label",playing?"Pause":"Play");
+els.dState.setAttribute("aria-pressed",playing?"true":"false");
+setText(els.dFmt,src?(src.kind==="url"?(isHlsUrl(src.url)?"HLS":"STREAM"):src.kind==="dir"&&!dirTrack?"FOLDER":fileFormatLabel(src.kind==="dir"?dirTrack.name:src.fileName)):"\u2014");
+const size=sourceSize(src,dirTrack);
+setText(els.dSize,size?fmtBytes(size):"\u2014");
+setText(els.dBits,src?(state.live?"LIVE":fmtBitrate(size,duration)||"\u2014"):"\u2014");
+const shuffle=!!state.settings.shuffle;
+els.ledShuffle.classList.toggle("on",shuffle);
+const repeat=state.settings.repeat||"off";
+setText(els.ledRepeat,repeat==="one"?"RPT 1":"RPT");
+els.ledRepeat.classList.toggle("on",repeat!=="off");
+const rate=clampRate(state.settings.rate);
+setText(els.ledSpeed,fmtRate(rate));
+els.ledSpeed.classList.toggle("on",Math.abs(rate-1)>.001);
+const sleepOn=!!sleepDeadline;
+setText(els.ledSleep,sleepOn?"SLEEP "+fmtTime(Math.ceil(sleepLeftMs()/1000)):"SLEEP");
+els.ledSleep.classList.toggle("on",sleepOn);
+const vol=Math.round(state.settings.volume*100);
+const muted=!!state.settings.muted||vol===0;
+setText(els.ledVol,muted?"VOL OFF":"VOL "+vol+"%");
+els.ledVol.classList.toggle("on",!muted);
+els.ledVol.classList.toggle("mute",muted);
+const bmCount=displayBookmarkCount(src);
+setText(els.ledBm,"BM "+bmCount);
+els.ledBm.classList.toggle("on",bmCount>0);
+}
+
 function renderPlayer(){
 const src=currentSource();
+const dirTrack=src?currentDirTrack(src):null;
 if(src){
-const dirTrack=currentDirTrack(src);
-els.track.textContent=src.name;
+const nowTitle=dirTrack?tagTitle(dirTrack.meta,dirTrack.name):src.kind==="local"?tagTitle(src.meta,src.name):src.name;
+setText(els.track,nowTitle);
+syncMarquee();
 let subText="";
-let subTitle="";
-if(src.kind==="dir"){
-const dir=state.dir&&state.dir.sourceId===src.id?state.dir:null;
 if(dirTrack){
-const pos=(dir.index+1)+" / "+dir.tracks.length;
-subText=tagLine(dirTrack.meta,dirTrack.name)+" · "+pos;
-subTitle=tagDetail(dirTrack.meta,dirTrack.name)+" · "+pos;
-}else{
-const lastName=previewTrackName(src);
-subText=lastName?lastName+" · last track":(dir&&dir.tracks.length?dir.tracks.length+" tracks · "+(dir.index+1)+" / "+dir.tracks.length:(src.trackCount?src.trackCount+" tracks":"Folder"));
-subTitle=lastName?src.lastTrack:subText;
-}
+const meta=dirTrack.meta||{};
+const parts=[];
+if(meta.artist&&meta.artist!==nowTitle)parts.push(meta.artist);
+if(meta.album&&meta.album!==nowTitle)parts.push(meta.album);
+subText=parts.join(" · ")||dirTrack.path||dirTrack.name;
+}else if(src.kind==="dir"){
+subText=src.trackCount?(src.trackCount+(src.trackCount===1?" track":" tracks")):"Folder";
 }else if(src.kind==="local"){
-subText=tagLine(src.meta,src.fileName||"Local audio file");
-subTitle=tagDetail(src.meta,src.fileName||"Local audio file");
+const meta=src.meta||{};
+const parts=[];
+if(meta.artist&&meta.artist!==nowTitle)parts.push(meta.artist);
+if(meta.album&&meta.album!==nowTitle)parts.push(meta.album);
+subText=parts.join(" · ")||src.fileName||"Local audio file";
 }else{
 subText=src.url;
-subTitle=subText;
 }
-els.trackSub.textContent=subText;
-els.trackSub.title=subTitle;
+setText(els.trackSub,subText);
+els.trackSub.title=subText;
 const type=src.kind==="local"?"local":src.kind==="dir"?"folder":(isHlsUrl(src.url)?"hls":"url");
 const temp=src.saved===false;
 const kindLabel=type==="local"?"LOCAL":type==="folder"?"FOLDER":type==="hls"?"HLS":"STREAM";
 els.kind.textContent=temp?"TEMP":(state.live?"LIVE":kindLabel);
 els.kind.className="kind "+(temp?"temp":state.live?"live":type==="hls"?"url":type);
-els.discLabel.textContent=initials(src.name);
-const colors=artColors(src.name);
-els.discLabel.style.background="linear-gradient(135deg,"+colors[0]+","+colors[1]+")";
-const nowTitle=dirTrack?tagTitle(dirTrack.meta,dirTrack.name):src.kind==="local"?tagTitle(src.meta,src.name):src.name;
 const nowArtist=dirTrack?(dirTrack.meta&&dirTrack.meta.artist):src.kind==="local"?(src.meta&&src.meta.artist):"";
 document.title=nowArtist?nowArtist+" — "+nowTitle+" · VibePlay":nowTitle+" · VibePlay";
 updateMediaSession(src);
 }else{
-els.track.textContent="Nothing playing";
-els.trackSub.textContent="Add a file, a stream or drop a folder";
+setText(els.track,"Nothing playing");
+syncMarquee();
+setText(els.trackSub,"Add a file, a stream or drop a folder");
 els.trackSub.title="";
 els.kind.textContent="IDLE";
 els.kind.className="kind";
-els.discLabel.textContent="VP";
-const colors=artColors("VibePlay");
-els.discLabel.style.background="linear-gradient(135deg,"+colors[0]+","+colors[1]+")";
 document.title="VibePlay";
 }
 const hasPlayable=state.sources.some(s=>!s.excluded);
 els.prev.disabled=!hasPlayable;
 els.next.disabled=!hasPlayable;
+renderDisplay();
 }
 
 function renderTransport(){
@@ -2285,6 +2435,7 @@ els.back30.disabled=!jumpable;
 els.fwd30.disabled=!jumpable;
 els.sleepBtn.disabled=!audio&&!currentSource();
 updateBookmarkButton();
+renderDisplay();
 document.body.classList.toggle("is-playing",state.playing);
 }
 
@@ -2297,6 +2448,7 @@ els.rateBtn.setAttribute("aria-label","Playback speed, "+fmtRate(rate));
 els.speedVal.textContent=fmtRate(rate);
 els.speedRange.value=String(Math.round(sliderFromRate(rate)*10)/10);
 applyRate();
+renderDisplay();
 }
 
 function renderVolume(){
@@ -2309,6 +2461,7 @@ els.mute.innerHTML=muted?ICON.volumeOff:ICON.volume;
 els.mute.classList.toggle("on",muted);
 els.mute.title=state.settings.muted?"Unmute":"Mute";
 els.mute.setAttribute("aria-label",state.settings.muted?"Unmute":"Mute");
+renderDisplay();
 }
 
 function updateMediaSession(src){
@@ -3191,31 +3344,48 @@ const ctx=frame.ctx;
 const w=frame.width;
 const h=frame.height;
 ctx.clearRect(0,0,w,h);
+ctx.strokeStyle="#ffffff08";
+ctx.lineWidth=1;
+for(let gx=24;gx<w;gx+=24){
+ctx.beginPath();
+ctx.moveTo(gx+.5,0);
+ctx.lineTo(gx+.5,h);
+ctx.stroke();
+}
+const bars=72;
+const pitch=w/bars;
 if(!analyserActive||!analyser||!audio||!freqData){
-ctx.fillStyle="#1c222c";
-ctx.fillRect(0,h/2-1,w,2);
+ctx.fillStyle="#14232b";
+for(let i=0;i<bars;i++)ctx.fillRect(i*pitch+(pitch-2)/2,h-7,Math.max(1,pitch-2),2);
+ctx.fillStyle="#ffffff0d";
+ctx.fillRect(0,h-.5,w,1);
 return;
 }
 analyser.getByteFrequencyData(freqData);
-const bars=64;
-const pitch=w/bars;
 const gradient=ctx.createLinearGradient(0,0,w,0);
 gradient.addColorStop(0,"#22d3ee");
-gradient.addColorStop(.6,"#38bdf8");
+gradient.addColorStop(.55,"#38bdf8");
 gradient.addColorStop(1,"#f472b6");
-ctx.fillStyle=gradient;
+const barWidth=Math.max(1,pitch-2);
 for(let i=0;i<bars;i++){
 const index=Math.floor(Math.pow(i/bars,1.7)*(freqData.length-1));
 let value=freqData[index]/255;
-if(!state.playing)value*=.45;
-const barHeight=Math.max(1.5,value*(h-8));
-const barWidth=Math.max(1,pitch-2);
-ctx.globalAlpha=.35+value*.65;
-ctx.fillRect(i*pitch+(pitch-barWidth)/2,h-4-barHeight,barWidth,barHeight);
+if(!state.playing)value*=.4;
+const barHeight=Math.max(1.5,value*(h-9));
+const x=i*pitch+(pitch-barWidth)/2;
+const y=h-4-barHeight;
+ctx.globalAlpha=.28+value*.72;
+ctx.fillStyle=gradient;
+ctx.fillRect(x,y,barWidth,barHeight);
+if(value>.5){
+ctx.globalAlpha=.9;
+ctx.fillStyle="#e6feff";
+ctx.fillRect(x,y,barWidth,1);
+}
 }
 ctx.globalAlpha=1;
-ctx.fillStyle="#ffffff0a";
-ctx.fillRect(0,h-4,w,1);
+ctx.fillStyle="#ffffff0d";
+ctx.fillRect(0,h-.5,w,1);
 }
 
 function updateTimes(){
@@ -3229,6 +3399,15 @@ els.tCur.textContent=fmtTime(current);
 if(state.live)els.tDur.textContent="LIVE";
 else if(duration>0)els.tDur.textContent=fmtTime(duration);
 else els.tDur.textContent=src?"--:--":"--:--";
+const dirTrack=src?currentDirTrack(src):null;
+setText(els.dBits,src?(state.live?"LIVE":fmtBitrate(sourceSize(src,dirTrack),duration)||"\u2014"):"\u2014");
+setText(els.dRem,duration>0?"\u2212"+fmtTime(Math.max(0,duration-current)):"\u2014");
+const bmCount=displayBookmarkCount(src);
+const bmText="BM "+bmCount;
+if(els.ledBm.textContent!==bmText){
+setText(els.ledBm,bmText);
+els.ledBm.classList.toggle("on",bmCount>0);
+}
 updateBookmarkAdd();
 }
 
@@ -3966,14 +4145,8 @@ bindMediaSession();
 requestAnimationFrame(loop);
 
 els.play.addEventListener("click",togglePlay);
-els.disc.addEventListener("click",togglePlay);
-els.disc.addEventListener("keydown",event=>{
-if(event.key==="Enter"||event.key===" "){
-event.preventDefault();
-event.stopPropagation();
-togglePlay();
-}
-});
+els.dState.addEventListener("click",togglePlay);
+window.addEventListener("resize",syncMarquee);
 els.prev.addEventListener("click",prevTrack);
 els.next.addEventListener("click",()=>nextTrack(false));
 els.shuffle.addEventListener("click",toggleShuffle);
@@ -4003,6 +4176,14 @@ const del=event.target.closest("[data-bmdel]");
 if(del)deleteBookmark(del.dataset.bmdel);
 });
 els.bmList.addEventListener("input",event=>{
+const noteInput=event.target.closest("[data-bmnotes]");
+if(noteInput){
+const bookmark=findBookmark(noteInput.dataset.bmnotes);
+if(!bookmark)return;
+bookmark.notes=noteInput.value.slice(0,500);
+saveBookmarks();
+return;
+}
 const input=event.target.closest("[data-bmname]");
 if(!input)return;
 const bookmark=findBookmark(input.dataset.bmname);
