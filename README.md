@@ -56,9 +56,11 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 | ⏳ **Never lose your place** | Resume points are stored per track and offered again when you reopen a local file or folder book. |
 | 🔖 **Mark chapters, quotes and notes** | Named bookmarks per track with optional notes (up to 500 characters), listed in a dedicated panel and drawn on the seekbar with tooltips. |
 | 📚 **Books split into many files** | Drop the whole book folder 📁: tracks are scanned recursively, sorted by name and advanced automatically. |
+| 📑 **Jump to any chapter** | Open the chapter list for the current folder, jump to a track by name and reopen it at any time. |
 | 🚫 **Skip intros, credits and samples** | Exclude any source from the playlist with one click 👁️‍🗨️ while keeping it in the library. |
 | 🎚️ **Slow or fast narrators** | Playback speed from **0.10× to 10×**, saved for the next session. |
-| ⏲️ **Fall asleep while listening** | Sleep timer from 1 to 720 minutes with a live countdown pill, working even while paused. |
+| ⏲️ **Fall asleep while listening** | Sleep timer from 1 to 720 minutes, or "end of this chapter", with a live countdown, fade-out and a stop even at the end of a book. |
+| 🔁 **Re-hear one sentence** | A-B repeat loops the exact passage you mark, drawn on the seekbar. |
 | ⏪ **Re-listen to the last sentence** | Dedicated −30 s / +30 s buttons, plus 5 s and 30 s arrow-key seeks. |
 | 🏷️ **Book and author metadata** | ID3v2 / ID3v1 parsing for title, artist and album — album often carries the book title. |
 | 🔍 **Large libraries** | Reference names, instant filtering and drag & drop queue ordering keep hundreds of books manageable. |
@@ -75,24 +77,28 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 |---|---|---|
 | 🎧 | **Audiobook-first** | Bookmarks, resume points, variable speed, sleep timer and folder books built for long-form listening. |
 | 📂 | **Local files & folders** | Pick an audio file, or drop files and whole folders anywhere on the page. |
+| 📑 | **Chapter list** | Open any folder as a chapter list, jump straight to a track and see which one is playing. |
 | 🌐 | **Direct streams & HLS** | Play direct audio URLs and `.m3u8` HLS streams (native on Safari, via `hls.js` elsewhere). |
 | 🏷️ | **Named sources** | Save each source under a reference name; rename it any time with the ✏️ button. |
 | 🧭 | **Queue control** | Move sources ⬆️⬇️, drag rows to reorder, filter with the 🔍 search box. |
 | 🚫 | **Exclude from playlist** | Keep a source in the library but skip it in the queue with the 👁️‍🗨️ toggle. |
-| 🔀 | **Shuffle & repeat** | Shuffle across included sources; repeat off 🔁 / all 🔁 / one 1️⃣. |
+| 🔀 | **Shuffle & repeat** | Shuffle plays every included source once per cycle; repeat off 🔁 / all 🔁 / one 1️⃣. |
 | 💾 | **Session-only sources** | Turn saving off to listen now without storing the source (🟡 TEMP badge). |
-| 🔗 | **Relink files** | Reconnect a saved local source to its file with one click when the browser forgets it. |
+| 🔗 | **Relink files & folders** | Reconnect a saved local file or folder with one click when the browser forgets it. |
 | ↩️ | **Undo remove** | Removing a source shows a toast with an **UNDO** action. |
-| 🎚️ | **Playback speed** | Fine-grained range from **0.10× to 10×**, saved between sessions. |
-| ⏲️ | **Sleep timer** | Stop playback after 1–720 minutes, with a live countdown pill. |
+| 🎚️ | **Playback speed** | Fine-grained range from **0.10× to 10×**, remembered per source, with optional pitch preservation. |
+| 🔁 | **A-B repeat** | Loop any section of a track; the range is drawn on the seekbar and loops until cleared. |
+| 🤫 | **Skip silence** | Jumps over silent passages in decoded local tracks without changing the speed. |
+| ⏲️ | **Sleep timer** | Stop playback after 1–720 minutes or at the end of the current track, with a 4-second fade-out. |
 | 🔖 | **Bookmarks & notes** | Named markers per track with editable notes (500 characters), shown on the seekbar and in a dedicated list. |
 | ⏯️ | **Resume points** | Every local track remembers where you stopped and offers to resume. |
 | 📊 | **Waveform & spectrum** | Decoded waveform for local tracks and a live spectrum analyzer for playing audio. |
 | 🎛️ | **Seekbar intelligence** | Hover markers for bookmarks and resume points, plus ±30 s jump buttons. |
 | 🖥️ | **Media Session** | Track metadata and OS media keys where supported. |
 | 📦 | **Backup & restore** | Export/import the whole library as JSON, with **merge** or **overwrite**. |
-| 🌙 | **Polished dark UI** | Responsive layout, OLED-style digital display, toasts, reduced-motion support. |
-| 📴 | **Service worker** | Caches the app shell for offline use (see the icon note below). |
+| 🌙 | **Polished dark UI** | Responsive layout, OLED-style digital display with artwork backdrop, full-screen Now Playing view, sticky dialogs, toasts and reduced-motion support. |
+| ♿ | **Keyboard & screen readers** | Seekbar exposed as a slider, focus trapping in dialogs, live announcements, chapter navigation by key. |
+| 📴 | **Service worker** | Caches the app shell with network-first updates, so the app opens offline. |
 
 ---
 
@@ -100,8 +106,11 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 
 ```
 🖥️  digital display →  title marquee · state LED · source name · track counter
-📊  readouts       →  format · bitrate · file size · shuffle · repeat · speed · sleep · volume
+📊  readouts       →  format · bitrate · file size · shuffle · repeat · speed · sleep · volume · A-B · skip
 ⏯️  status chip    →  play / pause by clicking the LED chip
+🖼️  artwork        →  cover art from tags, blurred behind the display
+🔍  seekbar        →  hover any point for its time, markers for bookmarks and resume
+🖥️  Now Playing    →  full-screen view with cover art, progress and transport
 📈  waveform       →  local tracks · 🌈 live spectrum  →  analysers
 🎯  seekbar        →  bookmarks 🔖 and resume points 🟢 markers
 ⏱️  times          →  current · ±30 s · duration / LIVE
@@ -158,7 +167,9 @@ python -m http.server 8080
 | <kbd>N</kbd> | ⏭️ Next track |
 | <kbd>P</kbd> | ⏮️ Previous track |
 | <kbd>M</kbd> | 🔇 Mute / unmute |
+| <kbd>A</kbd> | 🔁 Open A-B repeat |
 | <kbd>B</kbd> | 🔖 Open bookmarks |
+| <kbd>C</kbd> | 📑 Open the chapter list of the current folder |
 | <kbd>Enter</kbd> / <kbd>Space</kbd> on a row | ▶️ Play that source |
 | <kbd>Esc</kbd> | ❌ Close the open dialog |
 
@@ -215,7 +226,7 @@ Open **DATA** 🗄️ in the header to:
 | 🌈 | **Web Audio API** — analyser node for the spectrum, `decodeAudioData` for the waveform. |
 | 🗃️ | **IndexedDB** for file/folder handles, **localStorage** for the library. |
 | 📡 | **hls.js** loaded on demand from jsDelivr for non-Safari HLS playback. |
-| 🧾 | **ID3v2 / ID3v1** tag parsing for title, artist and album. |
+| 🧾 | **ID3v2 / ID3v1** tag parsing for title, artist and album, with cover art from **APIC** frames and **FLAC PICTURE** blocks. |
 | ⚙️ | **No frameworks, no bundler, no dependencies to install** 🎉 |
 
 ---
@@ -224,12 +235,15 @@ Open **DATA** 🗄️ in the header to:
 
 ```
 📦 VibePlay
-├── 🌐 index.html   # app shell — markup, styles and all player logic
-├── 🖼️ favicon.ico  # site icon
-└── 📴 sw.js        # service worker — caches the app shell for offline use
+├── 🌐 index.html        # app shell — markup, styles and all player logic
+├── 🧭 manifest.json     # installable PWA manifest
+├── 🖼️ favicon.ico       # site icon
+├── 🖼️ icon-192x192.png  # app icon
+├── 🖼️ icon-512x512.png  # app icon
+└── 📴 sw.js             # service worker — caches the app shell for offline use
 ```
 
-> 🧩 `sw.js` lists `icon-192x192.png` and `icon-512x512.png` in its cache manifest: add those two files (or remove them from the list) so the service worker installs cleanly and offline caching works.
+> 🧩 The service worker serves navigation network-first and falls back to the cached shell: updates arrive on the next load, while the app still opens offline.
 
 ---
 
