@@ -1439,7 +1439,8 @@ if(el.readyState>=1&&isFinite(el.duration)&&el.duration>0)seek();
 else el.addEventListener("loadedmetadata",seek,{once:true});
 }
 function canBookmark(){
-return !!(audio&&activeTrackKey&&!state.live);
+const src=currentSource();
+return !!(audio&&activeTrackKey&&!state.live&&src&&src.kind!=="url");
 }
 function canAddBookmark(){
 return canBookmark()&&isFinite(audio.duration)&&audio.duration>0&&isFinite(audio.currentTime);
@@ -1449,7 +1450,8 @@ return canAddBookmark()?"ADD BOOKMARK AT "+fmtTime(audio.currentTime):"ADD BOOKM
 }
 function updateBookmarkButton(){
 const count=activeTrackKey&&bookmarks[activeTrackKey]?bookmarks[activeTrackKey].length:0;
-const enabled=!!audio&&!!activeTrackKey;
+const src=currentSource();
+const enabled=!!audio&&!!activeTrackKey&&!state.live&&!!src&&src.kind!=="url";
 els.bookmarksBtn.disabled=!enabled;
 const label=count?"Bookmarks ("+count+")":"Bookmarks";
 els.bookmarksBtn.title=label;
@@ -1506,6 +1508,11 @@ if(els.bmAdd.textContent!==label)els.bmAdd.textContent=label;
 function openBookmarks(){
 if(!audio||!activeTrackKey){
 toast("Play a track first");
+return;
+}
+const src=currentSource();
+if(!src||src.kind==="url"||state.live){
+toast("Bookmarks are not available for streams");
 return;
 }
 clearSeekHover();
@@ -2083,8 +2090,8 @@ if(!currentSource()){
 toast("Select a track first");
 return;
 }
-if(state.live){
-toast("Speed is not available for live streams");
+if(currentSource()&&currentSource().kind==="url"){
+toast("Speed is not available for streams");
 return;
 }
 clearSeekHover();
@@ -3141,11 +3148,11 @@ document.body.classList.toggle("is-playing",state.playing);
 function renderRate(){
 const rate=effectiveRate();
 const src=currentSource();
-const usable=!!src&&!state.live;
+const usable=!!src&&!state.live&&src.kind!=="url";
 els.rateBtn.textContent=fmtRate(rate);
 els.rateBtn.disabled=!usable;
 els.rateBtn.classList.toggle("on",usable&&Math.abs(rate-1)>.001);
-els.rateBtn.title=usable?"Playback speed: "+fmtRate(rate):src?"Playback speed (live stream)":"Playback speed (select a track)";
+els.rateBtn.title=usable?"Playback speed: "+fmtRate(rate):src&&src.kind==="url"?"Playback speed (streams play at 1x)":"Playback speed (select a track)";
 els.rateBtn.setAttribute("aria-label",usable?"Playback speed, "+fmtRate(rate):els.rateBtn.title);
 els.speedVal.textContent=fmtRate(rate);
 els.speedRange.value=String(Math.round(sliderFromRate(rate)*10)/10);
@@ -3238,6 +3245,7 @@ audio.muted=!!state.settings.muted;
 }
 function effectiveRate(){
 const src=currentSource();
+if(src&&src.kind==="url")return 1;
 return src&&typeof src.rate==="number"&&isFinite(src.rate)?clampRate(src.rate):clampRate(state.settings.rate);
 }
 function applyPitch(){
