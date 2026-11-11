@@ -799,7 +799,7 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 </div>
 </div>
 <div class="sleep-pill" id="sleepPill" hidden>
-<span>SLEEP</span><b id="sleepLeft">30:00</b><button class="sleep-pill-x" id="sleepCancel" type="button" aria-label="Cancel sleep timer" title="Cancel sleep timer">&times;</button>
+<span>SLEEP</span><button class="sleep-pill-x" id="sleepCancel" type="button" aria-label="Cancel sleep timer" title="Cancel sleep timer">&times;</button>
 </div>
 <div class="transport">
 <button class="tr" id="shuffle" title="Shuffle" aria-label="Shuffle"></button>
@@ -1944,7 +1944,6 @@ return;
 els.sleepPill.hidden=!active;
 if(active){
 const text=sleepAtTrackEnd?"END":fmtTime(Math.ceil(left/1000));
-if(els.sleepLeft.textContent!==text)els.sleepLeft.textContent=text;
 els.sleepBtn.classList.add("on");
 const label=sleepAtTrackEnd?"Sleep timer: stops at the end of the track":"Sleep timer: "+text+" remaining";
 els.sleepBtn.title=label;
@@ -2654,7 +2653,6 @@ stageNext:$("#stageNext"),
 seekTip:$("#seekTip"),
 sleepBtn:$("#sleepBtn"),
 sleepPill:$("#sleepPill"),
-sleepLeft:$("#sleepLeft"),
 sleepCancel:$("#sleepCancel"),
 sleepModal:$("#sleepModal"),
 sleepClose:$("#sleepClose"),
