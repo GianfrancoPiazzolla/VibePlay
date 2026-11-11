@@ -218,15 +218,15 @@ width:100%;display:flex;align-items:center;justify-content:space-between;gap:10p
 }
 .now-label{font:800 9.5px ui-monospace,Menlo,monospace;letter-spacing:.22em;color:#748095}
 .now-tools{display:flex;align-items:center;gap:6px}
-.bm-btn{width:28px;height:28px;border-radius:50%}
-.sleep-btn{width:28px;height:28px;border-radius:50%}
+.tool-btn{width:28px;height:28px;min-width:0;padding:0;border-radius:50%;flex:none;line-height:1}
+.tool-btn svg{display:block}
 .sleep-btn.on{color:#fbbf24;border-color:#4a3a1a;background:#221b0c;box-shadow:0 0 12px #fbbf2426}
 .rate-btn{
-width:auto;min-width:34px;height:28px;padding:0 6px;border-radius:999px;
 font:800 9px ui-monospace,Menlo,monospace;letter-spacing:0;font-variant-numeric:tabular-nums;
 }
 .rate-btn.on{color:var(--accent);border-color:#1f4b57;background:#0b2027;box-shadow:0 0 12px #22d3ee2e}
 .icon-btn:disabled{opacity:.38;cursor:default}
+.icon-btn:disabled:hover{border-color:#2d3340;color:#aab4c5;background:linear-gradient(#232833,#181b22)}
 .kind{
 display:inline-flex;align-items:center;gap:6px;border:1px solid #2b3441;border-radius:20px;
 padding:3px 9px;font:800 8.5px ui-monospace,Menlo,monospace;letter-spacing:.12em;color:var(--dim);
@@ -682,7 +682,7 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 .tr{width:38px;height:38px}
 .tr.play-big{width:56px;height:56px}
 .jump{padding:4px 7px;font-size:9px}
-.bm-btn{width:26px;height:26px}
+.tool-btn{width:26px;height:26px}
 .volume{max-width:100%}
 #viz{height:46px}
 .src-actions{opacity:1;pointer-events:auto;background:linear-gradient(90deg,#14171df2,#14171d 30%)}
@@ -742,19 +742,19 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <div class="now-head">
 <span class="now-label">NOW PLAYING</span>
 <div class="now-tools">
-<button class="icon-btn bm-btn" id="chaptersBtn" type="button" title="Chapters (folders only)" aria-label="Chapters" disabled>
+<button class="icon-btn tool-btn bm-btn" id="chaptersBtn" type="button" title="Chapters (folders only)" aria-label="Chapters" disabled>
 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1" fill="currentColor" stroke="none"/></svg>
 </button>
-<button class="icon-btn bm-btn" id="bookmarksBtn" type="button" title="Bookmarks" aria-label="Bookmarks" disabled>
+<button class="icon-btn tool-btn bm-btn" id="bookmarksBtn" type="button" title="Bookmarks" aria-label="Bookmarks" disabled>
 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4V4Z"/></svg>
 </button>
-<button class="icon-btn sleep-btn" id="sleepBtn" type="button" title="Sleep timer" aria-label="Sleep timer" disabled>
-<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.6 2M9 3h6"/></svg>
+<button class="icon-btn tool-btn sleep-btn" id="sleepBtn" type="button" title="Sleep timer" aria-label="Sleep timer" disabled>
+<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.6 2M9 3h6"/></svg>
 </button>
-<button class="icon-btn rate-btn" id="rateBtn" type="button" title="Playback speed" aria-label="Playback speed">1&times;</button>
-<button class="icon-btn ab-btn" id="abBtn" type="button" title="A-B repeat" aria-label="A-B repeat">A-B</button>
-<button class="icon-btn" id="stageBtn" type="button" title="Now playing view" aria-label="Now playing view">
-<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></svg>
+<button class="icon-btn tool-btn rate-btn" id="rateBtn" type="button" title="Playback speed" aria-label="Playback speed">1&times;</button>
+<button class="icon-btn tool-btn ab-btn" id="abBtn" type="button" title="A-B repeat" aria-label="A-B repeat" disabled>A-B</button>
+<button class="icon-btn tool-btn" id="stageBtn" type="button" title="Now playing view" aria-label="Now playing view" disabled>
+<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></svg>
 </button>
 </div>
 </div>
@@ -788,14 +788,17 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <span class="chip" id="dFmt">&mdash;</span>
 <span class="chip" id="dBits">&mdash;</span>
 <span class="chip" id="dSize">&mdash;</span>
+<span></span>
 <span class="led" id="ledShuffle">SHUF</span>
 <span class="led" id="ledRepeat">RPT</span>
-<span class="led" id="ledSpeed">1&times;</span>
-<span class="led warn" id="ledSleep">SLEEP</span>
-<span class="led" id="ledVol">VOL 80%</span>
+<span></span>
 <span class="led" id="ledBm">BM 0</span>
+<span class="led warn" id="ledSleep">SLEEP</span>
+<span class="led" id="ledSpeed">1&times;</span>
 <span class="led" id="ledAB">A-B</span>
+<span></span>
 <span class="led" id="ledSkip">SKIP</span>
+<span class="led" id="ledVol">VOL 80%</span>
 </div>
 </div>
 <div class="sleep-pill" id="sleepPill" hidden>
@@ -1829,6 +1832,10 @@ els.stage.classList.add("has-art");
 }
 }
 function openStage(){
+if(!currentSource()){
+toast("Select a track first");
+return;
+}
 renderStage();
 els.stage.hidden=false;
 setTimeout(()=>els.stageClose.focus(),40);
@@ -1854,7 +1861,7 @@ const status=on?"Looping "+fmtTime(abStart)+" to "+fmtTime(abEnd):abStart!==null
 if(els.abStatus.textContent!==status)els.abStatus.textContent=status;
 }
 function openAB(){
-if(!audio||state.live){
+if(!audio||state.live||!isFinite(audio.duration)||audio.duration<=0){
 toast("Play a track first");
 return;
 }
@@ -2072,6 +2079,14 @@ if(save!==false)saveSettings();
 renderRate();
 }
 function openSpeed(){
+if(!currentSource()){
+toast("Select a track first");
+return;
+}
+if(state.live){
+toast("Speed is not available for live streams");
+return;
+}
 clearSeekHover();
 renderRate();
 els.speedModal.hidden=false;
@@ -3078,13 +3093,24 @@ els.kind.className="kind";
 document.title="VibePlay";
 announce("Nothing playing");
 }
-const chaptersEnabled=!!src&&src.kind==="dir";
-els.chaptersBtn.disabled=!chaptersEnabled;
-els.chaptersBtn.title=chaptersEnabled?"Chapters":"Chapters (folders only)";
+renderToolStates();
 const hasPlayable=state.sources.some(s=>!s.excluded);
 els.prev.disabled=!hasPlayable;
 els.next.disabled=!hasPlayable;
 renderDisplay();
+}
+
+function renderToolStates(){
+const src=currentSource();
+const ready=!!audio&&!state.live&&isFinite(audio.duration)&&audio.duration>0;
+els.stageBtn.disabled=!src;
+els.stageBtn.title=src?"Now playing view":"Now playing view (select a track)";
+els.abBtn.disabled=!ready;
+els.abBtn.title=ready?"A-B repeat":"A-B repeat (needs a loaded track)";
+const chapters=!!src&&src.kind==="dir";
+els.chaptersBtn.disabled=!chapters;
+els.chaptersBtn.title=chapters?"Chapters":"Chapters (folders only)";
+els.sleepBtn.disabled=!audio&&!src;
 }
 
 function renderTransport(){
@@ -3106,7 +3132,7 @@ els.repeat.title="Repeat: "+(state.settings.repeat==="one"?"one track":state.set
 const jumpable=!!audio&&!state.live&&isFinite(audio.duration)&&audio.duration>0;
 els.back30.disabled=!jumpable;
 els.fwd30.disabled=!jumpable;
-els.sleepBtn.disabled=!audio&&!currentSource();
+renderToolStates();
 updateBookmarkButton();
 renderDisplay();
 document.body.classList.toggle("is-playing",state.playing);
@@ -3114,10 +3140,13 @@ document.body.classList.toggle("is-playing",state.playing);
 
 function renderRate(){
 const rate=effectiveRate();
+const src=currentSource();
+const usable=!!src&&!state.live;
 els.rateBtn.textContent=fmtRate(rate);
-els.rateBtn.classList.toggle("on",Math.abs(rate-1)>.001);
-els.rateBtn.title="Playback speed: "+fmtRate(rate);
-els.rateBtn.setAttribute("aria-label","Playback speed, "+fmtRate(rate));
+els.rateBtn.disabled=!usable;
+els.rateBtn.classList.toggle("on",usable&&Math.abs(rate-1)>.001);
+els.rateBtn.title=usable?"Playback speed: "+fmtRate(rate):src?"Playback speed (live stream)":"Playback speed (select a track)";
+els.rateBtn.setAttribute("aria-label",usable?"Playback speed, "+fmtRate(rate):els.rateBtn.title);
 els.speedVal.textContent=fmtRate(rate);
 els.speedRange.value=String(Math.round(sliderFromRate(rate)*10)/10);
 els.pitchKeep.checked=state.settings.keepPitch!==false;
