@@ -633,6 +633,8 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 .eq-range::-moz-range-track{height:4px;border-radius:4px;background:#31465a}
 .eq-range::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:#67e8f9;border:1px solid #0e7490;box-shadow:0 0 8px #22d3ee66}
 .eq-range:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.eq-range:disabled{opacity:.4;cursor:default}
+.eq-presets .btn:disabled,.eq-actions .btn:disabled{opacity:.4;cursor:default}
 .eq-hz{font:700 9px var(--mono);color:#7d8798}
 .eq-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
 .eq-presets .btn{padding:7px 3px;font-size:9px}
@@ -2134,13 +2136,10 @@ function writeEq(patch){
 const src=currentSource();
 const current=eqFor(src);
 const bands=(patch.bands||current.bands).slice();
+if(!src)return;
 const clean=sanitizeEq({...current,...patch,bands});
-state.settings.eq=clean;
-if(src){
 src.eq=clean;
 if(src.saved!==false)saveSources();
-}
-saveSettings();
 applyEqGains();
 renderEq();
 renderDisplay();
@@ -2148,17 +2147,23 @@ renderDisplay();
 function renderEq(){
 const src=currentSource();
 const config=eqFor(src);
+const editable=!!src;
 els.eqEnabled.checked=config.enabled;
-els.eqScope.textContent=src?"Stored for \u201c"+src.name+"\u201d":"Default for new sources";
+els.eqEnabled.disabled=!editable;
+els.eqBass.disabled=!editable;
+els.eqReset.disabled=!editable;
+els.eqScope.textContent=src?"Stored for \u201c"+src.name+"\u201d":"Select a source to edit its equalizer";
 els.eqGrid.querySelectorAll("[data-eqband]").forEach(input=>{
 const index=Number(input.dataset.eqband);
 const value=config.bands[index]||0;
-if(Number(input.value)!==value)input.value=String(value);
+input.disabled=!editable;
+input.value=String(value);
 const label=input.closest(".eq-band").querySelector(".eq-val");
 const text=(value>0?"+":"")+value;
 if(label.textContent!==text)label.textContent=text;
 });
 els.eqPresets.querySelectorAll("[data-preset]").forEach(button=>{
+button.disabled=!editable;
 button.classList.toggle("on",!config.bass&&button.dataset.preset===config.preset);
 });
 els.eqBass.classList.toggle("on",!!config.bass);
@@ -2244,7 +2249,7 @@ out.bass=!!raw.bass;
 return out;
 }
 function loadSettings(){
-const base={volume:.8,muted:false,shuffle:false,repeat:"off",lastId:null,rate:1,keepPitch:true,skipSilence:false,eq:{enabled:false,bands:[0,0,0,0,0],preset:"flat",bass:false}};
+const base={volume:.8,muted:false,shuffle:false,repeat:"off",lastId:null,rate:1,keepPitch:true,skipSilence:false};
 try{
 const raw=JSON.parse(localStorage.getItem(LS_SETTINGS)||"{}");
 if(typeof raw.volume==="number"&&isFinite(raw.volume))base.volume=clamp(raw.volume,0,1);
@@ -2255,7 +2260,9 @@ if(typeof raw.lastId==="string")base.lastId=raw.lastId;
 if(typeof raw.rate==="number")base.rate=clampRate(raw.rate);
 base.keepPitch=raw.keepPitch!==false;
 base.skipSilence=!!raw.skipSilence;
-base.eq=sanitizeEq(raw.eq);
+if(raw&&typeof raw==="object"&&Object.prototype.hasOwnProperty.call(raw,"eq")){
+try{localStorage.setItem(LS_SETTINGS,JSON.stringify(base));}catch(e){}
+}
 }catch(e){}
 return base;
 }
@@ -2347,7 +2354,7 @@ if(Object.keys(meta).length)out.meta=meta;
 }
 if(isFinite(src.addedAt))out.addedAt=src.addedAt;
 if(typeof src.rate==="number"&&isFinite(src.rate))out.rate=clampRate(src.rate);
-if(src.eq)out.eq=sanitizeEq(src.eq);
+out.eq=sanitizeEq(src.eq);
 return out;
 }
 function exportBackup(){
@@ -2366,6 +2373,7 @@ const time=+value;
 if((key.startsWith("local:")||key.startsWith("dir:"))&&isFinite(time)&&time>0)outResume[key]=time;
 }
 const settings={...state.settings};
+delete settings.eq;
 if(!settings.lastId||!ids.has(settings.lastId))settings.lastId=null;
 const payload={
 app:BACKUP_APP,
@@ -2417,7 +2425,7 @@ if(Object.keys(meta).length)src.meta=meta;
 }
 if(isFinite(raw.addedAt))src.addedAt=+raw.addedAt;
 if(typeof raw.rate==="number"&&isFinite(raw.rate))src.rate=clampRate(raw.rate);
-if(raw.eq)src.eq=sanitizeEq(raw.eq);
+src.eq=sanitizeEq(raw.eq);
 seen.add(src.id);
 return src;
 }
@@ -2449,7 +2457,7 @@ if(isFinite(time)&&time>0)out[key]=time;
 return out;
 }
 function sanitizeBackupSettings(raw){
-const base={volume:.8,muted:false,shuffle:false,repeat:"off",lastId:null,rate:1,keepPitch:true,skipSilence:false,eq:{enabled:false,bands:[0,0,0,0,0],preset:"flat",bass:false}};
+const base={volume:.8,muted:false,shuffle:false,repeat:"off",lastId:null,rate:1,keepPitch:true,skipSilence:false};
 if(!raw||typeof raw!=="object")return base;
 if(typeof raw.volume==="number"&&isFinite(raw.volume))base.volume=clamp(raw.volume,0,1);
 base.muted=!!raw.muted;
@@ -2459,7 +2467,6 @@ if(typeof raw.lastId==="string")base.lastId=raw.lastId;
 if(typeof raw.rate==="number")base.rate=clampRate(raw.rate);
 base.keepPitch=raw.keepPitch!==false;
 base.skipSilence=!!raw.skipSilence;
-base.eq=sanitizeEq(raw.eq);
 return base;
 }
 function parseBackup(text){
@@ -3431,8 +3438,8 @@ audio.muted=!!state.settings.muted;
 }
 }
 function eqFor(src){
-if(src&&src.eq)return sanitizeEq(src.eq);
-return sanitizeEq(state.settings.eq);
+if(src)return sanitizeEq(src.eq);
+return sanitizeEq(null);
 }
 function applyEqGains(){
 if(!eqFilters||!eqFilters.length)return;
