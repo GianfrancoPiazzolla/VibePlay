@@ -622,6 +622,24 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 .chapter-skeleton{display:flex;flex-direction:column;gap:4px}
 .chapter-skeleton span{display:block;height:34px;border-radius:var(--r-sm);background:linear-gradient(90deg,#11161d,#19202a,#11161d);background-size:200% 100%;animation:shimmer 1.1s linear infinite}
 @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+.eq-scale{display:flex;justify-content:space-between;font:600 9px var(--mono);color:#6f7b8e;margin:2px 4px 4px}
+.eq-grid{display:flex;align-items:flex-end;gap:4px;padding:10px 2px 4px;border:1px solid var(--line);border-radius:var(--r-md);background:#0d1015}
+.eq-band{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:0}
+.eq-val{font:800 10px var(--mono);color:var(--accent);font-variant-numeric:tabular-nums;min-height:14px}
+.eq-track{width:34px;height:132px;display:grid;place-items:center}
+.eq-range{width:132px;height:26px;margin:0;transform:rotate(-90deg);-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+.eq-range::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,#233040,#31465a)}
+.eq-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;margin-top:-5.5px;border-radius:50%;background:linear-gradient(#eaffff,#67e8f9);border:1px solid #0e7490;box-shadow:0 0 8px #22d3ee66}
+.eq-range::-moz-range-track{height:4px;border-radius:4px;background:#31465a}
+.eq-range::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:#67e8f9;border:1px solid #0e7490;box-shadow:0 0 8px #22d3ee66}
+.eq-range:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+.eq-hz{font:700 9px var(--mono);color:#7d8798}
+.eq-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+.eq-presets .btn{padding:7px 3px;font-size:9px}
+.eq-presets .btn.on{color:var(--accent);border-color:#1f4b57;background:#0b2027;box-shadow:0 0 12px #22d3ee2e}
+.eq-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.eq-actions .btn.on{color:#fbbf24;border-color:#4a3a1a;background:#221b0c}
+@media(max-width:560px){.eq-track{height:108px}.eq-range{width:108px}.eq-presets{grid-template-columns:repeat(2,1fr)}}
 .stage{position:fixed;inset:0;z-index:75;display:flex;justify-content:center;background:#05080c;overflow:hidden}
 .stage[hidden]{display:none}
 .stage-art{position:absolute;inset:-12%;background-position:center;background-size:cover;filter:blur(60px) saturate(1.3);opacity:.35;transform:scale(1.08);pointer-events:none}
@@ -753,6 +771,9 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 </button>
 <button class="icon-btn tool-btn rate-btn" id="rateBtn" type="button" title="Playback speed" aria-label="Playback speed">1&times;</button>
 <button class="icon-btn tool-btn ab-btn" id="abBtn" type="button" title="A-B repeat" aria-label="A-B repeat" disabled>A-B</button>
+<button class="icon-btn tool-btn" id="eqBtn" type="button" title="Equalizer: off" aria-label="Equalizer">
+<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 4v16M12 4v16M18 4v16"/><circle cx="6" cy="9" r="2"/><circle cx="12" cy="15" r="2"/><circle cx="18" cy="8" r="2"/></svg>
+</button>
 <button class="icon-btn tool-btn" id="stageBtn" type="button" title="Now playing view" aria-label="Now playing view" disabled>
 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></svg>
 </button>
@@ -798,6 +819,7 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <span class="led" id="ledAB">A-B</span>
 <span></span>
 <span class="led" id="ledSkip">SKIP</span>
+<span class="led" id="ledEq">EQ</span>
 <span class="led" id="ledVol">VOL 80%</span>
 </div>
 </div>
@@ -950,6 +972,26 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <div class="chapter-list" id="chapterList"></div>
 </div>
 <div class="modal-foot"><button class="btn" id="chaptersDone" type="button">CLOSE</button></div>
+</div>
+</div>
+
+<div class="modal" id="eqModal" hidden>
+<div class="modal-card small" role="dialog" aria-modal="true" aria-labelledby="eqTitle">
+<div class="modal-head">
+<h2 id="eqTitle">Equalizer</h2>
+<button class="icon-btn" id="eqClose" type="button" aria-label="Close">&times;</button>
+</div>
+<div class="modal-body">
+<label class="save-row" for="eqEnabled">
+<span class="save-copy"><b>Equalizer</b><small id="eqScope">Default for new sources</small></span>
+<span class="switch"><input type="checkbox" id="eqEnabled"><span class="switch-ui"></span></span>
+</label>
+<div class="eq-grid" id="eqGrid"></div>
+<div class="eq-presets" id="eqPresets"></div>
+<div class="eq-actions"><button class="btn" id="eqBass" type="button">BASS BOOST</button><button class="btn" id="eqReset" type="button">RESET</button></div>
+<p class="hint" id="eqHint">Each step is \u00b12.4 dB (\u00b112 dB per band). Changes are saved for this source and included in backups.</p>
+</div>
+<div class="modal-foot"><button class="btn primary" id="eqDone" type="button">DONE</button></div>
 </div>
 </div>
 
@@ -2085,6 +2127,80 @@ if(src.saved!==false)saveSources();
 if(save!==false)saveSettings();
 renderRate();
 }
+function eqPresetById(id){
+return EQ_PRESETS.find(preset=>preset.id===id)||null;
+}
+function writeEq(patch){
+const src=currentSource();
+const current=eqFor(src);
+const bands=(patch.bands||current.bands).slice();
+const clean=sanitizeEq({...current,...patch,bands});
+state.settings.eq=clean;
+if(src){
+src.eq=clean;
+if(src.saved!==false)saveSources();
+}
+saveSettings();
+applyEqGains();
+renderEq();
+renderDisplay();
+}
+function renderEq(){
+const src=currentSource();
+const config=eqFor(src);
+els.eqEnabled.checked=config.enabled;
+els.eqScope.textContent=src?"Stored for \u201c"+src.name+"\u201d":"Default for new sources";
+els.eqGrid.querySelectorAll("[data-eqband]").forEach(input=>{
+const index=Number(input.dataset.eqband);
+const value=config.bands[index]||0;
+if(Number(input.value)!==value)input.value=String(value);
+const label=input.closest(".eq-band").querySelector(".eq-val");
+const text=(value>0?"+":"")+value;
+if(label.textContent!==text)label.textContent=text;
+});
+els.eqPresets.querySelectorAll("[data-preset]").forEach(button=>{
+button.classList.toggle("on",!config.bass&&button.dataset.preset===config.preset);
+});
+els.eqBass.classList.toggle("on",!!config.bass);
+els.eqBtn.classList.toggle("on",config.enabled);
+els.eqBtn.title=config.enabled?"Equalizer: on":"Equalizer: off";
+els.eqBtn.setAttribute("aria-label",els.eqBtn.title);
+els.ledEq.classList.toggle("on",config.enabled);
+els.ledEq.classList.toggle("warn",config.enabled&&!!audio&&!eqGraphActive);
+}
+function buildEqUi(){
+const labels=EQ_BANDS.map(band=>band>=1000?(band/1000).toFixed(1).replace(/\.0$/,"")+"k":String(band));
+els.eqGrid.innerHTML=EQ_BANDS.map((band,index)=>'<label class="eq-band"><span class="eq-val">0</span><span class="eq-track"><input class="eq-range" type="range" min="-5" max="5" step="1" value="0" data-eqband="'+index+'" aria-label="'+labels[index]+' Hz"></span><span class="eq-hz">'+labels[index]+'</span></label>').join("");
+els.eqPresets.innerHTML=EQ_PRESETS.map(preset=>'<button class="btn" type="button" data-preset="'+preset.id+'">'+esc(preset.name.toUpperCase())+'</button>').join("");
+}
+function openEq(){
+clearSeekHover();
+renderEq();
+els.eqModal.hidden=false;
+setTimeout(()=>els.eqClose.focus(),40);
+}
+function closeEq(){
+els.eqModal.hidden=true;
+els.eqBtn.focus();
+}
+function applyEqPreset(id){
+const preset=eqPresetById(id);
+if(!preset)return;
+writeEq({bands:preset.bands.slice(),preset:id,bass:false});
+}
+function toggleEqBass(){
+const config=eqFor(currentSource());
+if(config.bass){
+writeEq({bands:(eqBassPrev||[0,0,0,0,0]).slice(),preset:eqBassPrev?"custom":"flat",bass:false});
+}else{
+eqBassPrev=config.bands.slice();
+writeEq({bands:EQ_BASS.slice(),bass:true,preset:"custom"});
+}
+}
+function resetEq(){
+eqBassPrev=null;
+writeEq({bands:[0,0,0,0,0],preset:"flat",bass:false});
+}
 function openSpeed(){
 if(!currentSource()){
 toast("Select a track first");
@@ -2113,8 +2229,22 @@ return raw.filter(s=>s&&typeof s.id==="string"&&typeof s.name==="string"&&(s.kin
 return [];
 }
 }
+function sanitizeEq(raw){
+const out={enabled:false,bands:[0,0,0,0,0],preset:"flat",bass:false};
+if(!raw||typeof raw!=="object")return out;
+out.enabled=!!raw.enabled;
+if(Array.isArray(raw.bands)){
+for(let i=0;i<5;i++){
+const value=Number(raw.bands[i]);
+if(isFinite(value))out.bands[i]=clamp(Math.round(value),-5,5);
+}
+}
+if(typeof raw.preset==="string"&&/^[a-z]{2,12}$/.test(raw.preset))out.preset=raw.preset;
+out.bass=!!raw.bass;
+return out;
+}
 function loadSettings(){
-const base={volume:.8,muted:false,shuffle:false,repeat:"off",lastId:null,rate:1,keepPitch:true,skipSilence:false};
+const base={volume:.8,muted:false,shuffle:false,repeat:"off",lastId:null,rate:1,keepPitch:true,skipSilence:false,eq:{enabled:false,bands:[0,0,0,0,0],preset:"flat",bass:false}};
 try{
 const raw=JSON.parse(localStorage.getItem(LS_SETTINGS)||"{}");
 if(typeof raw.volume==="number"&&isFinite(raw.volume))base.volume=clamp(raw.volume,0,1);
@@ -2125,6 +2255,7 @@ if(typeof raw.lastId==="string")base.lastId=raw.lastId;
 if(typeof raw.rate==="number")base.rate=clampRate(raw.rate);
 base.keepPitch=raw.keepPitch!==false;
 base.skipSilence=!!raw.skipSilence;
+base.eq=sanitizeEq(raw.eq);
 }catch(e){}
 return base;
 }
@@ -2216,6 +2347,7 @@ if(Object.keys(meta).length)out.meta=meta;
 }
 if(isFinite(src.addedAt))out.addedAt=src.addedAt;
 if(typeof src.rate==="number"&&isFinite(src.rate))out.rate=clampRate(src.rate);
+if(src.eq)out.eq=sanitizeEq(src.eq);
 return out;
 }
 function exportBackup(){
@@ -2285,6 +2417,7 @@ if(Object.keys(meta).length)src.meta=meta;
 }
 if(isFinite(raw.addedAt))src.addedAt=+raw.addedAt;
 if(typeof raw.rate==="number"&&isFinite(raw.rate))src.rate=clampRate(raw.rate);
+if(raw.eq)src.eq=sanitizeEq(raw.eq);
 seen.add(src.id);
 return src;
 }
@@ -2316,7 +2449,7 @@ if(isFinite(time)&&time>0)out[key]=time;
 return out;
 }
 function sanitizeBackupSettings(raw){
-const base={volume:.8,muted:false,shuffle:false,repeat:"off",lastId:null,rate:1,keepPitch:true,skipSilence:false};
+const base={volume:.8,muted:false,shuffle:false,repeat:"off",lastId:null,rate:1,keepPitch:true,skipSilence:false,eq:{enabled:false,bands:[0,0,0,0,0],preset:"flat",bass:false}};
 if(!raw||typeof raw!=="object")return base;
 if(typeof raw.volume==="number"&&isFinite(raw.volume))base.volume=clamp(raw.volume,0,1);
 base.muted=!!raw.muted;
@@ -2326,6 +2459,7 @@ if(typeof raw.lastId==="string")base.lastId=raw.lastId;
 if(typeof raw.rate==="number")base.rate=clampRate(raw.rate);
 base.keepPitch=raw.keepPitch!==false;
 base.skipSilence=!!raw.skipSilence;
+base.eq=sanitizeEq(raw.eq);
 return base;
 }
 function parseBackup(text){
@@ -2475,6 +2609,7 @@ dirCache.clear();
 stopSleepTimer(true);
 state.sources=backup.sources.slice();
 state.settings={...backup.settings};
+applyEqGains();
 bookmarks=backup.bookmarks;
 resumePoints=backup.resumePoints;
 let current=state.settings.lastId&&getSource(state.settings.lastId)?state.settings.lastId:null;
@@ -2588,6 +2723,23 @@ const handles=new Map();
 const dirCache=new Map();
 let audioCtx=null;
 let analyser=null;
+let eqFilters=[];
+let eqGraphActive=false;
+let eqWarned=false;
+let eqBassPrev=null;
+const EQ_BANDS=[60,230,910,3600,14000];
+const EQ_DB_PER_STEP=2.4;
+const EQ_BASS=[5,4,-1,-2,-1];
+const EQ_PRESETS=[
+{id:"flat",name:"Flat",bands:[0,0,0,0,0]},
+{id:"rock",name:"Rock",bands:[4,3,-2,2,3]},
+{id:"pop",name:"Pop",bands:[-1,2,4,2,-1]},
+{id:"jazz",name:"Jazz",bands:[3,2,0,2,3]},
+{id:"classical",name:"Classical",bands:[2,1,0,2,3]},
+{id:"electronic",name:"Electronic",bands:[5,4,1,2,3]},
+{id:"audiobook",name:"Audiobook",bands:[-3,-1,4,3,-1]},
+{id:"podcast",name:"Podcast",bands:[-2,0,3,2,-1]}
+];
 let freqData=null;
 let audio=null;
 let graphNodes=[];
@@ -2626,6 +2778,7 @@ ledShuffle:$("#ledShuffle"),
 ledRepeat:$("#ledRepeat"),
 ledSpeed:$("#ledSpeed"),
 ledSleep:$("#ledSleep"),
+ledEq:$("#ledEq"),
 ledVol:$("#ledVol"),
 ledBm:$("#ledBm"),
 ledAB:$("#ledAB"),
@@ -2650,6 +2803,16 @@ chaptersClose:$("#chaptersClose"),
 chaptersDone:$("#chaptersDone"),
 chapterTrack:$("#chapterTrack"),
 chapterList:$("#chapterList"),
+eqBtn:$("#eqBtn"),
+eqModal:$("#eqModal"),
+eqClose:$("#eqClose"),
+eqDone:$("#eqDone"),
+eqEnabled:$("#eqEnabled"),
+eqScope:$("#eqScope"),
+eqGrid:$("#eqGrid"),
+eqPresets:$("#eqPresets"),
+eqBass:$("#eqBass"),
+eqReset:$("#eqReset"),
 stageBtn:$("#stageBtn"),
 abBtn:$("#abBtn"),
 abModal:$("#abModal"),
@@ -3044,6 +3207,11 @@ setText(els.ledSleep,sleepOn?"SLEEP "+fmtTime(Math.ceil(sleepLeftMs()/1000)):"SL
 els.ledSleep.classList.toggle("on",sleepOn);
 const vol=Math.round(state.settings.volume*100);
 const muted=!!state.settings.muted||vol===0;
+const eqConfig=eqFor(src);
+setText(els.ledEq,"EQ");
+els.ledEq.classList.toggle("on",eqConfig.enabled);
+els.ledEq.classList.toggle("warn",eqConfig.enabled&&!!audio&&!eqGraphActive);
+els.eqBtn.classList.toggle("on",eqConfig.enabled);
 setText(els.ledVol,muted?"VOL OFF":"VOL "+vol+"%");
 els.ledVol.classList.toggle("on",!muted);
 els.ledVol.classList.toggle("mute",muted);
@@ -3208,6 +3376,17 @@ analyser=audioCtx.createAnalyser();
 analyser.fftSize=1024;
 analyser.smoothingTimeConstant=.82;
 analyser.connect(audioCtx.destination);
+eqFilters=EQ_BANDS.map(band=>{
+const filter=audioCtx.createBiquadFilter();
+filter.type="peaking";
+filter.frequency.value=band;
+filter.Q.value=1.1;
+filter.gain.value=0;
+return filter;
+});
+for(let i=0;i<eqFilters.length-1;i++)eqFilters[i].connect(eqFilters[i+1]);
+eqFilters[eqFilters.length-1].connect(analyser);
+applyEqGains();
 freqData=new Uint8Array(analyser.frequencyBinCount);
 }catch(e){
 audioCtx=null;
@@ -3227,12 +3406,20 @@ const ctx=ensureCtx();
 if(!ctx||!analyser)return false;
 try{
 const node=ctx.createMediaElementSource(el);
-node.connect(analyser);
+if(eqFilters&&eqFilters.length)node.connect(eqFilters[0]);
+else node.connect(analyser);
 graphNodes.push(node);
 analyserActive=true;
+eqGraphActive=true;
+applyEqGains();
 return true;
 }catch(e){
 analyserActive=false;
+eqGraphActive=false;
+if(!eqWarned&&eqFor(currentSource()).enabled){
+eqWarned=true;
+toast("Playing without the equalizer");
+}
 return false;
 }
 }
@@ -3242,6 +3429,19 @@ if(audio){
 audio.volume=state.settings.volume;
 audio.muted=!!state.settings.muted;
 }
+}
+function eqFor(src){
+if(src&&src.eq)return sanitizeEq(src.eq);
+return sanitizeEq(state.settings.eq);
+}
+function applyEqGains(){
+if(!eqFilters||!eqFilters.length)return;
+const config=eqFor(currentSource());
+const bands=config.enabled?config.bands:[0,0,0,0,0];
+eqFilters.forEach((filter,index)=>{
+const db=clamp(bands[index],-5,5)*EQ_DB_PER_STEP;
+try{filter.gain.value=db;}catch(e){}
+});
 }
 function effectiveRate(){
 const src=currentSource();
@@ -3334,6 +3534,7 @@ try{n.disconnect();}catch(e){}
 });
 graphNodes=[];
 analyserActive=false;
+eqGraphActive=false;
 if(objectUrl){
 try{URL.revokeObjectURL(objectUrl);}catch(e){}
 objectUrl=null;
@@ -3545,6 +3746,7 @@ abStart=null;
 abEnd=null;
 lastSilenceJump=0;
 if(!els.abModal.hidden)renderAB();
+if(!els.eqModal.hidden)renderEq();
 state.preview=null;
 lastResumeWrite=0;
 const resumeAt=activeTrackKey?resumePoints[activeTrackKey]||0:0;
@@ -4760,7 +4962,7 @@ const types=dt.types?Array.from(dt.types):[];
 return types.includes("Files");
 }
 function anyModalOpen(){
-return !els.addModal.hidden||!els.renameModal.hidden||!els.dropModal.hidden||!els.aboutModal.hidden||!els.bookmarksModal.hidden||!els.chaptersModal.hidden||!els.abModal.hidden||!els.sleepModal.hidden||!els.speedModal.hidden||!els.dataModal.hidden||!els.stage.hidden;
+return !els.addModal.hidden||!els.renameModal.hidden||!els.dropModal.hidden||!els.aboutModal.hidden||!els.bookmarksModal.hidden||!els.chaptersModal.hidden||!els.abModal.hidden||!els.sleepModal.hidden||!els.speedModal.hidden||!els.dataModal.hidden||!els.stage.hidden||!els.eqModal.hidden;
 }
 function showDropOverlay(){
 if(anyModalOpen())return;
@@ -5006,6 +5208,8 @@ migrateTrackKeys();
 pruneTrackData();
 render();
 renderAB();
+buildEqUi();
+renderEq();
 bindMediaSession();
 requestAnimationFrame(loop);
 
@@ -5089,6 +5293,27 @@ if(event.target===els.abModal)closeAB();
 els.abSetA.addEventListener("click",()=>setABPoint("a"));
 els.abSetB.addEventListener("click",()=>setABPoint("b"));
 els.abClear.addEventListener("click",clearAB);
+els.eqBtn.addEventListener("click",openEq);
+els.eqClose.addEventListener("click",closeEq);
+els.eqDone.addEventListener("click",closeEq);
+els.eqModal.addEventListener("click",event=>{
+if(event.target===els.eqModal)closeEq();
+});
+els.eqEnabled.addEventListener("change",()=>writeEq({enabled:els.eqEnabled.checked}));
+els.eqGrid.addEventListener("input",event=>{
+const input=event.target.closest("[data-eqband]");
+if(!input)return;
+const index=Number(input.dataset.eqband);
+const bands=eqFor(currentSource()).bands.slice();
+bands[index]=clamp(Number(input.value),-5,5);
+writeEq({bands,preset:"custom",bass:false});
+});
+els.eqPresets.addEventListener("click",event=>{
+const button=event.target.closest("[data-preset]");
+if(button)applyEqPreset(button.dataset.preset);
+});
+els.eqBass.addEventListener("click",toggleEqBass);
+els.eqReset.addEventListener("click",resetEq);
 els.stageBtn.addEventListener("click",openStage);
 els.stageClose.addEventListener("click",closeStage);
 els.stagePrev.addEventListener("click",prevTrack);
@@ -5477,6 +5702,7 @@ if(!els.aboutModal.hidden)closeAbout();
 if(!els.bookmarksModal.hidden)closeBookmarks();
 if(!els.chaptersModal.hidden)closeChapters();
 if(!els.abModal.hidden)closeAB();
+if(!els.eqModal.hidden)closeEq();
 if(!els.stage.hidden)closeStage();
 if(!els.sleepModal.hidden)closeSleep();
 if(!els.speedModal.hidden)closeSpeed();
