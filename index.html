@@ -626,8 +626,8 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 .eq-grid{display:flex;align-items:flex-end;gap:4px;padding:10px 2px 4px;border:1px solid var(--line);border-radius:var(--r-md);background:#0d1015}
 .eq-band{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:0}
 .eq-val{font:800 10px var(--mono);color:var(--accent);font-variant-numeric:tabular-nums;min-height:14px}
-.eq-track{width:34px;height:132px;display:grid;place-items:center}
-.eq-range{width:132px;height:26px;margin:0;transform:rotate(-90deg);-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
+.eq-track{position:relative;width:34px;height:132px}
+.eq-range{position:absolute;left:50%;top:50%;width:132px;height:26px;margin:0;transform:translate(-50%,-50%) rotate(-90deg);transform-origin:center;-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
 .eq-range::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,#233040,#31465a)}
 .eq-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:15px;height:15px;margin-top:-5.5px;border-radius:50%;background:linear-gradient(#eaffff,#67e8f9);border:1px solid #0e7490;box-shadow:0 0 8px #22d3ee66}
 .eq-range::-moz-range-track{height:4px;border-radius:4px;background:#31465a}
