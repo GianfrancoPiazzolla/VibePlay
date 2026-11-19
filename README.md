@@ -100,6 +100,7 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 | ♿ | **Keyboard & screen readers** | Seekbar exposed as a slider, focus trapping in dialogs, live announcements, chapter navigation by key. |
 | 🎛️ | **5-band equalizer** | 60/230/910/3.6k/14k Hz, ±12 dB, eight presets, Bass Boost and zero reset — saved per source. |
 | 🔴 | **Record playback** | Captures the equalized output as WebM/Opus with a custom name, a red REC timer and automatic stop on pause or track change. |
+| 🎙️ | **Voice memo** | Records the device microphone as WebM/Opus with a custom name, a red MIC timer and a second click to stop; available while playback is paused. |
 | 📴 | **Service worker** | Caches the app shell with network-first updates, so the app opens offline. |
 
 ---
@@ -108,7 +109,7 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 
 ```
 🖥️  digital display →  title marquee · state LED · source name · track counter
-📊  readouts       →  format · bitrate · file size · shuffle · repeat · speed · sleep · volume · A-B · skip · EQ · REC
+📊  readouts       →  format · bitrate · file size · shuffle · repeat · speed · sleep · volume · A-B · skip · EQ · REC · MIC
 ⏯️  status chip    →  play / pause by clicking the LED chip
 🖼️  artwork        →  cover art from tags, blurred behind the display
 🔍  seekbar        →  hover any point for its time, markers for bookmarks and resume
@@ -225,7 +226,7 @@ Open **DATA** 🗄️ in the header to:
 |---|---|
 | 🧱 | **HTML5 + CSS3 + vanilla JavaScript** — one self-contained `index.html`. |
 | 🎧 | **HTMLAudioElement** for playback and **Media Session API** for OS integration. |
-| 🌈 | **Web Audio API** — five biquad filters for the equalizer, an analyser node for the spectrum, `MediaRecorder` for local recordings, `decodeAudioData` for the waveform. |
+| 🌈 | **Web Audio API** — five biquad filters for the equalizer, an analyser node for the spectrum, `MediaRecorder` for local recordings, `getUserMedia` for microphone capture, `decodeAudioData` for the waveform. |
 | 🗃️ | **IndexedDB** for file/folder handles, **localStorage** for the library. |
 | 📡 | **hls.js** loaded on demand from jsDelivr for non-Safari HLS playback. |
 | 🧾 | **ID3v2 / ID3v1** tag parsing for title, artist and album, with cover art from **APIC** frames and **FLAC PICTURE** blocks. |
