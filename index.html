@@ -303,6 +303,13 @@ color:#57707d;
 .led.warn.on::before{background:#fbbf24;box-shadow:0 0 6px #fbbf24}
 .led.mute.on{color:#fca5a5;border-color:#4a2424;background:#1b0f10}
 .led.mute.on::before{background:#f87171;box-shadow:0 0 6px #f87171}
+.led.rec.on{color:#fecaca;border-color:#5b2626;background:#2a1212;box-shadow:0 0 10px #f8717133}
+.led.rec.on::before{background:#f87171;box-shadow:0 0 6px #f87171}
+#ledRec b{color:#f87171;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.06em}
+.rec-btn.on{color:#f87171;border-color:#5b2626;background:#2a1212;box-shadow:0 0 12px #f8717133}
+.rec-name-row{display:flex;align-items:center;gap:8px}
+.rec-name-row input{flex:1;min-width:0}
+.rec-ext{flex:none;font:800 10px var(--mono);color:#7d8798}
 .seek-wrap{width:100%;margin-top:16px;flex:none;position:relative}
 #seek{
 display:block;width:100%;height:58px;border-radius:11px;border:1px solid var(--line);
@@ -776,6 +783,9 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <button class="icon-btn tool-btn" id="eqBtn" type="button" title="Equalizer: off" aria-label="Equalizer">
 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 4v16M12 4v16M18 4v16"/><circle cx="6" cy="9" r="2"/><circle cx="12" cy="15" r="2"/><circle cx="18" cy="8" r="2"/></svg>
 </button>
+<button class="icon-btn tool-btn rec-btn" id="recBtn" type="button" title="Record (needs active playback)" aria-label="Record (needs active playback)" disabled>
+<svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/></svg>
+</button>
 <button class="icon-btn tool-btn" id="stageBtn" type="button" title="Now playing view" aria-label="Now playing view" disabled>
 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></svg>
 </button>
@@ -822,6 +832,7 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <span></span>
 <span class="led" id="ledSkip">SKIP</span>
 <span class="led" id="ledEq">EQ</span>
+<span class="led rec" id="ledRec">REC</span>
 <span class="led" id="ledVol">VOL 80%</span>
 </div>
 </div>
@@ -974,6 +985,24 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <div class="chapter-list" id="chapterList"></div>
 </div>
 <div class="modal-foot"><button class="btn" id="chaptersDone" type="button">CLOSE</button></div>
+</div>
+</div>
+
+<div class="modal" id="recModal" hidden>
+<div class="modal-card small" role="dialog" aria-modal="true" aria-labelledby="recTitle">
+<div class="modal-head">
+<h2 id="recTitle">Record</h2>
+<button class="icon-btn" id="recClose" type="button" aria-label="Close">&times;</button>
+</div>
+<div class="modal-body">
+<div class="field">
+<label for="recName">File name</label>
+<div class="rec-name-row"><input id="recName" type="text" autocomplete="off" spellcheck="false" maxlength="80"><span class="rec-ext" id="recExt">.webm</span></div>
+</div>
+<p class="hint">Records the equalized playback output as WebM/Opus. Stops automatically when playback pauses, ends or the source changes.</p>
+<p class="form-err" id="recErr" hidden></p>
+</div>
+<div class="modal-foot"><button class="btn ghost" id="recCancel" type="button">CANCEL</button><button class="btn primary" id="recStart" type="button">START</button></div>
 </div>
 </div>
 
@@ -2168,7 +2197,8 @@ button.classList.toggle("on",!config.bass&&button.dataset.preset===config.preset
 });
 els.eqBass.classList.toggle("on",!!config.bass);
 els.eqBtn.classList.toggle("on",config.enabled);
-els.eqBtn.title=config.enabled?"Equalizer: on":"Equalizer: off";
+els.eqBtn.disabled=!editable;
+els.eqBtn.title=editable?(config.enabled?"Equalizer: on":"Equalizer: off"):"Equalizer (select a source)";
 els.eqBtn.setAttribute("aria-label",els.eqBtn.title);
 els.ledEq.classList.toggle("on",config.enabled);
 els.ledEq.classList.toggle("warn",config.enabled&&!!audio&&!eqGraphActive);
@@ -2178,7 +2208,153 @@ const labels=EQ_BANDS.map(band=>band>=1000?(band/1000).toFixed(1).replace(/\.0$/
 els.eqGrid.innerHTML=EQ_BANDS.map((band,index)=>'<label class="eq-band"><span class="eq-val">0</span><span class="eq-track"><input class="eq-range" type="range" min="-5" max="5" step="1" value="0" data-eqband="'+index+'" aria-label="'+labels[index]+' Hz"></span><span class="eq-hz">'+labels[index]+'</span></label>').join("");
 els.eqPresets.innerHTML=EQ_PRESETS.map(preset=>'<button class="btn" type="button" data-preset="'+preset.id+'">'+esc(preset.name.toUpperCase())+'</button>').join("");
 }
+function recSupported(){
+return typeof MediaRecorder!=="undefined"&&typeof MediaRecorder.isTypeSupported==="function";
+}
+function recMime(){
+if(!recSupported())return "";
+const list=["audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus","audio/ogg"];
+for(const type of list){
+try{if(MediaRecorder.isTypeSupported(type))return type;}catch(e){}
+}
+return "";
+}
+function recExtFor(mime){
+return mime&&mime.indexOf("ogg")>-1?"ogg":"webm";
+}
+function canStartRecording(){
+return !!recDest&&eqGraphActive&&!!audio&&state.playing&&recSupported();
+}
+function defaultRecName(){
+const date=new Date();
+const pad=value=>String(value).padStart(2,"0");
+return "vibeplay_"+date.getFullYear()+pad(date.getMonth()+1)+pad(date.getDate())+"_"+pad(date.getHours())+pad(date.getMinutes());
+}
+function sanitizeRecName(raw){
+let name=String(raw||"").trim().replace(/[\\/:*?"<>|]+/g,"").replace(/\s+/g," ").slice(0,80).trim();
+name=name.replace(/\.(webm|ogg|mp3|wav|m4a|opus)$/i,"");
+return name||defaultRecName();
+}
+function formatRecClock(ms){
+const total=Math.max(0,Math.floor(ms/1000));
+const hours=Math.floor(total/3600);
+const minutes=Math.floor((total%3600)/60);
+const seconds=total%60;
+const mm=String(minutes).padStart(2,"0");
+const ss=String(seconds).padStart(2,"0");
+return hours?hours+":"+mm+":"+ss:mm+":"+ss;
+}
+function renderRec(){
+if(recorder){
+const clock=formatRecClock(Date.now()-recStartedAt);
+if(els.ledRec.dataset.clock!==clock){
+els.ledRec.innerHTML="REC <b>"+clock+"</b>";
+els.ledRec.dataset.clock=clock;
+}
+els.ledRec.classList.add("on");
+els.recBtn.classList.add("on");
+els.recBtn.disabled=false;
+els.recBtn.title="Stop recording";
+els.recBtn.setAttribute("aria-label","Stop recording");
+return;
+}
+els.ledRec.dataset.clock="";
+setText(els.ledRec,"REC");
+els.ledRec.classList.remove("on");
+els.recBtn.classList.remove("on");
+const ready=canStartRecording();
+els.recBtn.disabled=!ready;
+els.recBtn.title=ready?"Record playback":"Record (needs active playback and Web Audio)";
+els.recBtn.setAttribute("aria-label",els.recBtn.title);
+}
+function openRec(){
+if(!canStartRecording()){
+toast("Recording needs active playback");
+return;
+}
+clearSeekHover();
+els.recErr.hidden=true;
+els.recName.value=defaultRecName();
+els.recExt.textContent="."+recExtFor(recMime()||"audio/webm");
+els.recModal.hidden=false;
+setTimeout(()=>{els.recName.focus();els.recName.select();},40);
+}
+function closeRec(){
+els.recModal.hidden=true;
+els.recBtn.focus();
+}
+function startRecording(){
+if(!canStartRecording()){
+els.recErr.textContent="Recording needs active playback with Web Audio.";
+els.recErr.hidden=false;
+return;
+}
+const mime=recMime();
+let rec=null;
+try{
+rec=new MediaRecorder(recDest.stream,mime?{mimeType:mime}:undefined);
+}catch(e){
+els.recErr.textContent="The recorder could not start.";
+els.recErr.hidden=false;
+return;
+}
+const chunks=[];
+recFileName=sanitizeRecName(els.recName.value)+"."+recExtFor(mime||"audio/webm");
+rec.fileName=recFileName;
+recStartedAt=Date.now();
+recorder=rec;
+rec.ondataavailable=event=>{
+if(event.data&&event.data.size)chunks.push(event.data);
+};
+rec.onstop=()=>{
+const type=rec.mimeType||mime||"audio/webm";
+const blob=new Blob(chunks,{type});
+const auto=!!rec.autoStop;
+const active=recorder===rec;
+if(active)recorder=null;
+if(active){
+els.ledRec.dataset.clock="";
+renderRec();
+}
+if(blob.size){
+const url=URL.createObjectURL(blob);
+const link=document.createElement("a");
+link.href=url;
+link.download=rec.fileName||recFileName;
+document.body.appendChild(link);
+link.click();
+link.remove();
+setTimeout(()=>{try{URL.revokeObjectURL(url);}catch(e){}},2000);
+toast(auto?"Recording saved (playback stopped)":"Recording saved");
+}else{
+toast("Recording was empty");
+}
+};
+try{
+rec.start();
+}catch(e){
+recorder=null;
+els.recErr.textContent="The recorder could not start.";
+els.recErr.hidden=false;
+return;
+}
+closeRec();
+renderRec();
+toast("Recording started");
+}
+function stopRecording(auto){
+const rec=recorder;
+if(!rec)return;
+rec.autoStop=!!auto;
+recorder=null;
+try{rec.stop();}catch(e){}
+renderRec();
+}
 function openEq(){
+if(!currentSource()){
+toast("Select a source first");
+return;
+}
 clearSeekHover();
 renderEq();
 els.eqModal.hidden=false;
@@ -2731,6 +2907,10 @@ const dirCache=new Map();
 let audioCtx=null;
 let analyser=null;
 let eqFilters=[];
+let recorder=null;
+let recDest=null;
+let recStartedAt=0;
+let recFileName="";
 let eqGraphActive=false;
 let eqWarned=false;
 let eqBassPrev=null;
@@ -2786,6 +2966,7 @@ ledRepeat:$("#ledRepeat"),
 ledSpeed:$("#ledSpeed"),
 ledSleep:$("#ledSleep"),
 ledEq:$("#ledEq"),
+ledRec:$("#ledRec"),
 ledVol:$("#ledVol"),
 ledBm:$("#ledBm"),
 ledAB:$("#ledAB"),
@@ -2811,6 +2992,14 @@ chaptersDone:$("#chaptersDone"),
 chapterTrack:$("#chapterTrack"),
 chapterList:$("#chapterList"),
 eqBtn:$("#eqBtn"),
+recBtn:$("#recBtn"),
+recModal:$("#recModal"),
+recClose:$("#recClose"),
+recName:$("#recName"),
+recExt:$("#recExt"),
+recErr:$("#recErr"),
+recStart:$("#recStart"),
+recCancel:$("#recCancel"),
 eqModal:$("#eqModal"),
 eqClose:$("#eqClose"),
 eqDone:$("#eqDone"),
@@ -3219,9 +3408,12 @@ setText(els.ledEq,"EQ");
 els.ledEq.classList.toggle("on",eqConfig.enabled);
 els.ledEq.classList.toggle("warn",eqConfig.enabled&&!!audio&&!eqGraphActive);
 els.eqBtn.classList.toggle("on",eqConfig.enabled);
+els.eqBtn.disabled=!src;
+els.eqBtn.title=src?(eqConfig.enabled?"Equalizer: on":"Equalizer: off"):"Equalizer (select a source)";
 setText(els.ledVol,muted?"VOL OFF":"VOL "+vol+"%");
 els.ledVol.classList.toggle("on",!muted);
 els.ledVol.classList.toggle("mute",muted);
+renderRec();
 const bmCount=displayBookmarkCount(src);
 setText(els.ledBm,"BM "+bmCount);
 els.ledBm.classList.toggle("on",bmCount>0);
@@ -3383,6 +3575,8 @@ analyser=audioCtx.createAnalyser();
 analyser.fftSize=1024;
 analyser.smoothingTimeConstant=.82;
 analyser.connect(audioCtx.destination);
+recDest=audioCtx.createMediaStreamDestination();
+analyser.connect(recDest);
 eqFilters=EQ_BANDS.map(band=>{
 const filter=audioCtx.createBiquadFilter();
 filter.type="peaking";
@@ -3493,6 +3687,7 @@ el.addEventListener("pause",()=>{
 if(audio!==el)return;
 saveActiveResume(true);
 state.playing=false;
+if(recorder)stopRecording(true);
 renderTransport();
 syncMediaState("paused");
 });
@@ -3524,6 +3719,7 @@ return el;
 }
 
 function disposeAudio(){
+if(recorder)stopRecording(true);
 saveActiveResume(true);
 clearSeekHover();
 if(hls){
@@ -3583,6 +3779,7 @@ renderTransport();
 }
 
 function onEnded(){
+if(recorder)stopRecording(true);
 if(sleepAtTrackEnd){
 sleepAtTrackEnd=false;
 if(audio){
@@ -4445,6 +4642,7 @@ updateTimes();
 drawSeek();
 drawViz();
 renderSleep();
+renderRec();
 }
 
 function seekAt(clientX){
@@ -4969,7 +5167,7 @@ const types=dt.types?Array.from(dt.types):[];
 return types.includes("Files");
 }
 function anyModalOpen(){
-return !els.addModal.hidden||!els.renameModal.hidden||!els.dropModal.hidden||!els.aboutModal.hidden||!els.bookmarksModal.hidden||!els.chaptersModal.hidden||!els.abModal.hidden||!els.sleepModal.hidden||!els.speedModal.hidden||!els.dataModal.hidden||!els.stage.hidden||!els.eqModal.hidden;
+return !els.addModal.hidden||!els.renameModal.hidden||!els.dropModal.hidden||!els.aboutModal.hidden||!els.bookmarksModal.hidden||!els.chaptersModal.hidden||!els.abModal.hidden||!els.sleepModal.hidden||!els.speedModal.hidden||!els.dataModal.hidden||!els.stage.hidden||!els.eqModal.hidden||!els.recModal.hidden;
 }
 function showDropOverlay(){
 if(anyModalOpen())return;
@@ -5217,6 +5415,7 @@ render();
 renderAB();
 buildEqUi();
 renderEq();
+renderRec();
 bindMediaSession();
 requestAnimationFrame(loop);
 
@@ -5321,6 +5520,22 @@ if(button)applyEqPreset(button.dataset.preset);
 });
 els.eqBass.addEventListener("click",toggleEqBass);
 els.eqReset.addEventListener("click",resetEq);
+els.recBtn.addEventListener("click",()=>{
+if(recorder)stopRecording(false);
+else openRec();
+});
+els.recStart.addEventListener("click",startRecording);
+els.recCancel.addEventListener("click",closeRec);
+els.recClose.addEventListener("click",closeRec);
+els.recModal.addEventListener("click",event=>{
+if(event.target===els.recModal)closeRec();
+});
+els.recName.addEventListener("keydown",event=>{
+if(event.key==="Enter"){
+event.preventDefault();
+startRecording();
+}
+});
 els.stageBtn.addEventListener("click",openStage);
 els.stageClose.addEventListener("click",closeStage);
 els.stagePrev.addEventListener("click",prevTrack);
@@ -5710,6 +5925,7 @@ if(!els.bookmarksModal.hidden)closeBookmarks();
 if(!els.chaptersModal.hidden)closeChapters();
 if(!els.abModal.hidden)closeAB();
 if(!els.eqModal.hidden)closeEq();
+if(!els.recModal.hidden)closeRec();
 if(!els.stage.hidden)closeStage();
 if(!els.sleepModal.hidden)closeSleep();
 if(!els.speedModal.hidden)closeSpeed();
