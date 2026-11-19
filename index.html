@@ -305,7 +305,7 @@ color:#57707d;
 .led.mute.on::before{background:#f87171;box-shadow:0 0 6px #f87171}
 .led.rec.on{color:#fecaca;border-color:#5b2626;background:#2a1212;box-shadow:0 0 10px #f8717133}
 .led.rec.on::before{background:#f87171;box-shadow:0 0 6px #f87171}
-#ledRec b{color:#f87171;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.06em}
+#ledRec b,#ledVoice b{color:#f87171;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.06em}
 .rec-btn.on{color:#f87171;border-color:#5b2626;background:#2a1212;box-shadow:0 0 12px #f8717133}
 .rec-name-row{display:flex;align-items:center;gap:8px}
 .rec-name-row input{flex:1;min-width:0}
@@ -786,6 +786,9 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <button class="icon-btn tool-btn rec-btn" id="recBtn" type="button" title="Record (needs active playback)" aria-label="Record (needs active playback)" disabled>
 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/></svg>
 </button>
+<button class="icon-btn tool-btn rec-btn" id="voiceBtn" type="button" title="Record from microphone" aria-label="Record from microphone" disabled>
+<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg>
+</button>
 <button class="icon-btn tool-btn" id="stageBtn" type="button" title="Now playing view" aria-label="Now playing view" disabled>
 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></svg>
 </button>
@@ -833,6 +836,7 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <span class="led" id="ledSkip">SKIP</span>
 <span class="led" id="ledEq">EQ</span>
 <span class="led rec" id="ledRec">REC</span>
+<span class="led rec" id="ledVoice">MIC</span>
 <span class="led" id="ledVol">VOL 80%</span>
 </div>
 </div>
@@ -1003,6 +1007,24 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <p class="form-err" id="recErr" hidden></p>
 </div>
 <div class="modal-foot"><button class="btn ghost" id="recCancel" type="button">CANCEL</button><button class="btn primary" id="recStart" type="button">START</button></div>
+</div>
+</div>
+
+<div class="modal" id="voiceModal" hidden>
+<div class="modal-card small" role="dialog" aria-modal="true" aria-labelledby="voiceTitle">
+<div class="modal-head">
+<h2 id="voiceTitle">Voice memo</h2>
+<button class="icon-btn" id="voiceClose" type="button" aria-label="Close">&times;</button>
+</div>
+<div class="modal-body">
+<div class="field">
+<label for="voiceName">File name</label>
+<div class="rec-name-row"><input id="voiceName" type="text" autocomplete="off" spellcheck="false" maxlength="80"><span class="rec-ext" id="voiceExt">.webm</span></div>
+</div>
+<p class="hint">Records the device microphone as WebM/Opus. Pause playback before starting.</p>
+<p class="form-err" id="voiceErr" hidden></p>
+</div>
+<div class="modal-foot"><button class="btn ghost" id="voiceCancel" type="button">CANCEL</button><button class="btn primary" id="voiceStart" type="button">START</button></div>
 </div>
 </div>
 
@@ -2223,7 +2245,7 @@ function recExtFor(mime){
 return mime&&mime.indexOf("ogg")>-1?"ogg":"webm";
 }
 function canStartRecording(){
-return !!recDest&&eqGraphActive&&!!audio&&state.playing&&recSupported();
+return !!recDest&&eqGraphActive&&!!audio&&state.playing&&recSupported()&&!voiceRecorder;
 }
 function defaultRecName(){
 const date=new Date();
@@ -2348,6 +2370,141 @@ if(!rec)return;
 rec.autoStop=!!auto;
 recorder=null;
 try{rec.stop();}catch(e){}
+renderRec();
+}
+function voiceSupported(){
+return !!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)&&recSupported();
+}
+function canStartVoice(){
+return !state.playing&&!recorder&&!voiceRecorder&&voiceSupported();
+}
+function renderVoice(){
+if(voiceRecorder){
+const clock=formatRecClock(Date.now()-voiceStartedAt);
+if(els.ledVoice.dataset.clock!==clock){
+els.ledVoice.innerHTML="MIC <b>"+clock+"</b>";
+els.ledVoice.dataset.clock=clock;
+}
+els.ledVoice.classList.add("on");
+els.voiceBtn.classList.add("on");
+els.voiceBtn.disabled=false;
+els.voiceBtn.title="Stop voice recording";
+els.voiceBtn.setAttribute("aria-label","Stop voice recording");
+return;
+}
+els.ledVoice.dataset.clock="";
+setText(els.ledVoice,"MIC");
+els.ledVoice.classList.remove("on");
+els.voiceBtn.classList.remove("on");
+const ready=!state.playing&&!recorder&&voiceSupported();
+els.voiceBtn.disabled=!ready;
+els.voiceBtn.title=!voiceSupported()?"Voice recording unavailable":state.playing?"Voice (pause playback first)":"Record from microphone";
+els.voiceBtn.setAttribute("aria-label",els.voiceBtn.title);
+}
+function showVoiceError(message){
+els.voiceErr.textContent=message;
+els.voiceErr.hidden=false;
+}
+function openVoice(){
+if(!canStartVoice()){
+toast(!voiceSupported()?"Microphone recording is unavailable":state.playing?"Pause playback first":"Stop the playback recording first");
+return;
+}
+clearSeekHover();
+els.voiceErr.hidden=true;
+els.voiceName.value=defaultRecName();
+els.voiceExt.textContent="."+recExtFor(recMime()||"audio/webm");
+els.voiceModal.hidden=false;
+setTimeout(()=>{els.voiceName.focus();els.voiceName.select();},40);
+}
+function closeVoice(){
+els.voiceModal.hidden=true;
+els.voiceBtn.focus();
+}
+async function startVoice(){
+if(!voiceSupported()){
+showVoiceError("Microphone recording is not available in this browser.");
+return;
+}
+if(state.playing){
+showVoiceError("Pause playback before recording.");
+return;
+}
+if(recorder){
+showVoiceError("Stop the playback recording first.");
+return;
+}
+els.voiceErr.hidden=true;
+els.voiceStart.disabled=true;
+let stream=null;
+try{
+stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+if(state.playing){
+stream.getTracks().forEach(track=>track.stop());
+els.voiceStart.disabled=false;
+showVoiceError("Playback started. Pause it and try again.");
+return;
+}
+const mime=recMime();
+const rec=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
+const chunks=[];
+voiceStream=stream;
+voiceFileName=sanitizeRecName(els.voiceName.value)+"."+recExtFor(mime||"audio/webm");
+rec.fileName=voiceFileName;
+voiceStartedAt=Date.now();
+rec.ondataavailable=event=>{
+if(event.data&&event.data.size)chunks.push(event.data);
+};
+rec.onstop=()=>{
+const type=rec.mimeType||mime||"audio/webm";
+const blob=new Blob(chunks,{type});
+const active=voiceRecorder===rec;
+if(active)voiceRecorder=null;
+if(stream.getTracks)stream.getTracks().forEach(track=>track.stop());
+if(voiceStream===stream)voiceStream=null;
+if(active){
+els.ledVoice.dataset.clock="";
+renderVoice();
+renderRec();
+}
+if(blob.size){
+const url=URL.createObjectURL(blob);
+const link=document.createElement("a");
+link.href=url;
+link.download=rec.fileName||voiceFileName;
+document.body.appendChild(link);
+link.click();
+link.remove();
+setTimeout(()=>{try{URL.revokeObjectURL(url);}catch(e){}},2000);
+toast("Voice recording saved");
+}else{
+toast("Voice recording was empty");
+}
+};
+rec.start();
+voiceRecorder=rec;
+els.voiceStart.disabled=false;
+closeVoice();
+renderVoice();
+renderRec();
+toast("Voice recording started");
+}catch(err){
+if(stream&&stream.getTracks)stream.getTracks().forEach(track=>track.stop());
+if(voiceStream===stream)voiceStream=null;
+els.voiceStart.disabled=false;
+showVoiceError(err&&err.name==="NotAllowedError"?"Microphone access was denied.":"The microphone could not be started.");
+}
+}
+function stopVoice(){
+const rec=voiceRecorder;
+if(!rec)return;
+voiceRecorder=null;
+els.ledVoice.dataset.clock="";
+try{rec.stop();}catch(e){
+if(voiceStream&&voiceStream.getTracks)voiceStream.getTracks().forEach(track=>track.stop());
+voiceStream=null;
+}
+renderVoice();
 renderRec();
 }
 function openEq(){
@@ -2911,6 +3068,10 @@ let recorder=null;
 let recDest=null;
 let recStartedAt=0;
 let recFileName="";
+let voiceRecorder=null;
+let voiceStream=null;
+let voiceStartedAt=0;
+let voiceFileName="";
 let eqGraphActive=false;
 let eqWarned=false;
 let eqBassPrev=null;
@@ -2967,6 +3128,7 @@ ledSpeed:$("#ledSpeed"),
 ledSleep:$("#ledSleep"),
 ledEq:$("#ledEq"),
 ledRec:$("#ledRec"),
+ledVoice:$("#ledVoice"),
 ledVol:$("#ledVol"),
 ledBm:$("#ledBm"),
 ledAB:$("#ledAB"),
@@ -3000,6 +3162,14 @@ recExt:$("#recExt"),
 recErr:$("#recErr"),
 recStart:$("#recStart"),
 recCancel:$("#recCancel"),
+voiceBtn:$("#voiceBtn"),
+voiceModal:$("#voiceModal"),
+voiceClose:$("#voiceClose"),
+voiceName:$("#voiceName"),
+voiceExt:$("#voiceExt"),
+voiceErr:$("#voiceErr"),
+voiceStart:$("#voiceStart"),
+voiceCancel:$("#voiceCancel"),
 eqModal:$("#eqModal"),
 eqClose:$("#eqClose"),
 eqDone:$("#eqDone"),
@@ -3414,6 +3584,7 @@ setText(els.ledVol,muted?"VOL OFF":"VOL "+vol+"%");
 els.ledVol.classList.toggle("on",!muted);
 els.ledVol.classList.toggle("mute",muted);
 renderRec();
+renderVoice();
 const bmCount=displayBookmarkCount(src);
 setText(els.ledBm,"BM "+bmCount);
 els.ledBm.classList.toggle("on",bmCount>0);
@@ -3678,6 +3849,7 @@ el.mozPreservesPitch=keepPitch;
 }catch(e){}
 el.addEventListener("play",()=>{
 if(audio!==el)return;
+if(voiceRecorder)stopVoice();
 state.playing=true;
 renderTransport();
 resumeAudio();
@@ -4643,6 +4815,7 @@ drawSeek();
 drawViz();
 renderSleep();
 renderRec();
+renderVoice();
 }
 
 function seekAt(clientX){
@@ -5167,7 +5340,7 @@ const types=dt.types?Array.from(dt.types):[];
 return types.includes("Files");
 }
 function anyModalOpen(){
-return !els.addModal.hidden||!els.renameModal.hidden||!els.dropModal.hidden||!els.aboutModal.hidden||!els.bookmarksModal.hidden||!els.chaptersModal.hidden||!els.abModal.hidden||!els.sleepModal.hidden||!els.speedModal.hidden||!els.dataModal.hidden||!els.stage.hidden||!els.eqModal.hidden||!els.recModal.hidden;
+return !els.addModal.hidden||!els.renameModal.hidden||!els.dropModal.hidden||!els.aboutModal.hidden||!els.bookmarksModal.hidden||!els.chaptersModal.hidden||!els.abModal.hidden||!els.sleepModal.hidden||!els.speedModal.hidden||!els.dataModal.hidden||!els.stage.hidden||!els.eqModal.hidden||!els.recModal.hidden||!els.voiceModal.hidden;
 }
 function showDropOverlay(){
 if(anyModalOpen())return;
@@ -5416,6 +5589,7 @@ renderAB();
 buildEqUi();
 renderEq();
 renderRec();
+renderVoice();
 bindMediaSession();
 requestAnimationFrame(loop);
 
@@ -5534,6 +5708,22 @@ els.recName.addEventListener("keydown",event=>{
 if(event.key==="Enter"){
 event.preventDefault();
 startRecording();
+}
+});
+els.voiceBtn.addEventListener("click",()=>{
+if(voiceRecorder)stopVoice();
+else openVoice();
+});
+els.voiceStart.addEventListener("click",startVoice);
+els.voiceCancel.addEventListener("click",closeVoice);
+els.voiceClose.addEventListener("click",closeVoice);
+els.voiceModal.addEventListener("click",event=>{
+if(event.target===els.voiceModal)closeVoice();
+});
+els.voiceName.addEventListener("keydown",event=>{
+if(event.key==="Enter"){
+event.preventDefault();
+startVoice();
 }
 });
 els.stageBtn.addEventListener("click",openStage);
@@ -5926,6 +6116,7 @@ if(!els.chaptersModal.hidden)closeChapters();
 if(!els.abModal.hidden)closeAB();
 if(!els.eqModal.hidden)closeEq();
 if(!els.recModal.hidden)closeRec();
+if(!els.voiceModal.hidden)closeVoice();
 if(!els.stage.hidden)closeStage();
 if(!els.sleepModal.hidden)closeSleep();
 if(!els.speedModal.hidden)closeSpeed();
