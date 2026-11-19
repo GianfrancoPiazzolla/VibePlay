@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vibeplay-cache-v2.1.1';
+const CACHE_NAME = 'vibeplay-cache-v2.2.0';
 const ASSETS_TO_CACHE = [
   '/',
   'index.html',
