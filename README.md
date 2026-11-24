@@ -78,8 +78,8 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 | 🎧 | **Audiobook-first** | Bookmarks, resume points, variable speed, sleep timer and folder books built for long-form listening. |
 | 📂 | **Local files & folders** | Pick an audio file, or drop files and whole folders anywhere on the page. |
 | 📑 | **Chapter list** | Open any folder as a chapter list, jump straight to a track and see which one is playing. |
-| 🌐 | **Direct streams & HLS** | Play direct audio URLs and `.m3u8` HLS streams (native on Safari, via `hls.js` elsewhere). |
-| 🏷️ | **Named sources** | Save each source under a reference name; rename it any time with the ✏️ button. |
+| 🌐 | **Direct streams & HLS** | Play direct audio URLs and `.m3u8` HLS streams (native on Safari, via `hls.js` elsewhere), with live ICY or HLS ID3 titles labelled Title/Artist/Album when the server provides them. |
+| 🏷️ | **Named sources** | Save each source under a reference name; rename it or edit its stream URL any time with the ✏️ button. |
 | 🧭 | **Queue control** | Move sources ⬆️⬇️, drag rows to reorder, filter with the 🔍 search box. |
 | 🚫 | **Exclude from playlist** | Keep a source in the library but skip it in the queue with the 👁️‍🗨️ toggle. |
 | 🔀 | **Shuffle & repeat** | Shuffle plays every included source once per cycle; repeat off 🔁 / all 🔁 / one 1️⃣. |
@@ -130,7 +130,7 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 |---|---|---|
 | 💻 | **Local file** | Single audio file from your device, kept in IndexedDB for one-click access. |
 | 📁 | **Folder** | Drop a folder for a recursive scan; every audio file becomes a track, sorted by name. |
-| 🎧 | **Audio URL** | Direct links to `.mp3`, `.m4a`, `.aac`, `.ogg`, `.oga`, `.opus`, `.wav`, `.flac`, `.webm`, `.aif`, `.aiff`. |
+| 🎧 | **Audio URL** | Direct links to `.mp3`, `.m4a`, `.aac`, `.ogg`, `.oga`, `.opus`, `.wav`, `.flac`, `.webm`, `.aif`, `.aiff`. Live ICY titles appear when the stream allows CORS; HLS streams expose timed ID3 metadata. |
 | 📡 | **HLS stream** | `.m3u8` playlists, with native support on Safari and `hls.js` on other browsers. |
 
 ---
@@ -226,9 +226,9 @@ Open **DATA** 🗄️ in the header to:
 |---|---|
 | 🧱 | **HTML5 + CSS3 + vanilla JavaScript** — one self-contained `index.html`. |
 | 🎧 | **HTMLAudioElement** for playback and **Media Session API** for OS integration. |
-| 🌈 | **Web Audio API** — five biquad filters for the equalizer, an analyser node for the spectrum, `MediaRecorder` for local recordings, `getUserMedia` for microphone capture, `decodeAudioData` for the waveform. |
+| 🌈 | **Web Audio API** — five biquad filters for the equalizer, an analyser node for the spectrum, `MediaRecorder` for local recordings, `getUserMedia` for microphone capture, `fetch` with `Icy-MetaData` for ICY stream titles, `decodeAudioData` for the waveform. |
 | 🗃️ | **IndexedDB** for file/folder handles, **localStorage** for the library. |
-| 📡 | **hls.js** loaded on demand from jsDelivr for non-Safari HLS playback. |
+| 📡 | **hls.js** loaded on demand from jsDelivr for non-Safari HLS playback, including timed ID3 metadata for live titles. |
 | 🧾 | **ID3v2 / ID3v1** tag parsing for title, artist and album, with cover art from **APIC** frames and **FLAC PICTURE** blocks. |
 | ⚙️ | **No frameworks, no bundler, no dependencies to install** 🎉 |
 
