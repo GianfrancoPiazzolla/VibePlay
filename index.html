@@ -286,6 +286,7 @@ text-shadow:0 0 22px #22d3ee2e;
 margin:3px 0 0;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 font:600 10.5px ui-monospace,Menlo,monospace;letter-spacing:.02em;color:#7f93a4;
 }
+.d-sub .meta-val,.stage-sub .meta-val{color:#7fe7f5}
 .d-leds{
 display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:9px;padding-top:8px;
 border-top:1px solid #ffffff0f;
@@ -523,6 +524,7 @@ font:800 10px ui-monospace,Menlo,monospace;letter-spacing:.08em;cursor:pointer;
 .seg-btn:hover{color:#d7dce5}
 .seg-btn.on{background:linear-gradient(#172d36,#0e2229);border-color:#1f4b57;color:#a5f3fc;box-shadow:0 0 12px #22d3ee1f}
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:13px}
+.field[hidden]{display:none}
 .field label{font:800 9.5px ui-monospace,Menlo,monospace;letter-spacing:.2em;text-transform:uppercase;color:#748095}
 .field input[type="text"],.field input[type="url"],.field input[type="number"]{
 width:100%;padding:10px 11px;border-radius:9px;border:1px solid var(--line);background:#0d1015;
@@ -923,6 +925,10 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <div class="field">
 <label for="renameInput">Reference name</label>
 <input id="renameInput" type="text" maxlength="80" autocomplete="off">
+</div>
+<div class="field" id="renameUrlField" hidden>
+<label for="renameUrl">Stream URL</label>
+<input id="renameUrl" type="url" spellcheck="false" autocomplete="off">
 </div>
 <p class="form-err" id="renameErr" hidden></p>
 </div>
@@ -1920,7 +1926,7 @@ const src=currentSource();
 const dirTrack=src?currentDirTrack(src):null;
 const title=src?(dirTrack?tagTitle(dirTrack.meta,dirTrack.name):src.kind==="local"?tagTitle(src.meta,src.name):src.name):"Nothing playing";
 els.stageTitle.textContent=title;
-els.stageSub.textContent=els.trackSub.textContent||"";
+els.stageSub.innerHTML=els.trackSub.innerHTML||"";
 const key=currentCoverKey();
 const art=key?coverCache.get(key):null;
 if(art&&art.url){
@@ -3093,6 +3099,8 @@ let audio=null;
 let graphNodes=[];
 let objectUrl=null;
 let hls=null;
+let streamMeta=null;
+let icyController=null;
 let analyserActive=false;
 let playToken=0;
 let hoverSeek=null;
@@ -3264,7 +3272,10 @@ pickDir:$("#pickDir"),
 fileInfo:$("#fileInfo"),
 addErr:$("#addErr"),
 renameModal:$("#renameModal"),
+renameTitle:$("#renameTitle"),
 renameInput:$("#renameInput"),
+renameUrlField:$("#renameUrlField"),
+renameUrl:$("#renameUrl"),
 renameSave:$("#renameSave"),
 renameCancel:$("#renameCancel"),
 renameClose:$("#renameClose"),
@@ -3600,6 +3611,7 @@ const nowTitle=dirTrack?tagTitle(dirTrack.meta,dirTrack.name):src.kind==="local"
 setText(els.track,nowTitle);
 syncMarquee();
 let subText="";
+let subHtml="";
 if(dirTrack){
 const meta=dirTrack.meta||{};
 const parts=[];
@@ -3610,22 +3622,24 @@ subText=parts.join(" · ")||dirTrack.path||dirTrack.name;
 subText=src.trackCount?(src.trackCount+(src.trackCount===1?" track":" tracks")):"Folder";
 }else if(src.kind==="local"){
 const meta=src.meta||{};
-const parts=[];
-if(meta.artist&&meta.artist!==nowTitle)parts.push(meta.artist);
-if(meta.album&&meta.album!==nowTitle)parts.push(meta.album);
-subText=parts.join(" · ")||src.fileName||"Local audio file";
+subText=tagMetaText(meta,nowTitle)||src.fileName||"Local audio file";
+subHtml=tagMetaMarkup(meta,nowTitle);
 }else{
-subText=src.url;
+subText=streamMetaText(src)||src.url;
+subHtml=streamMetaMarkup(src);
 }
-setText(els.trackSub,subText);
+if(subHtml)els.trackSub.innerHTML=subHtml;
+else setText(els.trackSub,subText);
 els.trackSub.title=subText;
 const type=src.kind==="local"?"local":src.kind==="dir"?"folder":(isHlsUrl(src.url)?"hls":"url");
 const temp=src.saved===false;
 const kindLabel=type==="local"?"LOCAL":type==="folder"?"FOLDER":type==="hls"?"HLS":"STREAM";
 els.kind.textContent=temp?"TEMP":(state.live?"LIVE":kindLabel);
 els.kind.className="kind "+(temp?"temp":state.live?"live":type==="hls"?"url":type);
-const nowArtist=dirTrack?(dirTrack.meta&&dirTrack.meta.artist):src.kind==="local"?(src.meta&&src.meta.artist):"";
-document.title=nowArtist?nowArtist+" — "+nowTitle+" · VibePlay":nowTitle+" · VibePlay";
+const liveMeta=streamMetaFor(src);
+const nowArtist=dirTrack?(dirTrack.meta&&dirTrack.meta.artist):src.kind==="local"?(src.meta&&src.meta.artist):(liveMeta?liveMeta.artist:"");
+const nowLabel=liveMeta&&liveMeta.title?liveMeta.title:nowTitle;
+document.title=nowArtist?nowArtist+" — "+nowLabel+" · VibePlay":nowLabel+" · VibePlay";
 announce("Now playing "+nowTitle);
 updateMediaSession(src);
 }else{
@@ -3719,10 +3733,11 @@ try{
 if(typeof MediaMetadata==="undefined")return;
 const dirTrack=currentDirTrack(src);
 const meta=dirTrack?dirTrack.meta:src.meta;
+const liveMeta=streamMetaFor(src);
 const data={
-title:tagTitle(meta,dirTrack?dirTrack.name:src.name),
-artist:meta&&meta.artist?meta.artist:(dirTrack?src.name:src.kind==="local"?"Local file":hostLabel(src.url)),
-album:meta&&meta.album?meta.album:(dirTrack?src.name:"VibePlay")
+title:liveMeta&&liveMeta.title?liveMeta.title:tagTitle(meta,dirTrack?dirTrack.name:src.name),
+artist:liveMeta&&liveMeta.artist?liveMeta.artist:(meta&&meta.artist?meta.artist:(dirTrack?src.name:src.kind==="local"?"Local file":hostLabel(src.url))),
+album:liveMeta?(liveMeta.album||src.name):(meta&&meta.album?meta.album:(dirTrack?src.name:"VibePlay"))
 };
 const artKey=currentCoverKey();
 const art=artKey?coverCache.get(artKey):null;
@@ -3851,6 +3866,8 @@ el.addEventListener("play",()=>{
 if(audio!==el)return;
 if(voiceRecorder)stopVoice();
 state.playing=true;
+const liveSrc=currentSource();
+if(liveSrc&&liveSrc.kind==="url"&&state.live&&!isHlsUrl(liveSrc.url)&&!icyController)startIcyMetadata(liveSrc,playToken);
 renderTransport();
 resumeAudio();
 syncMediaState("playing");
@@ -3860,6 +3877,7 @@ if(audio!==el)return;
 saveActiveResume(true);
 state.playing=false;
 if(recorder)stopRecording(true);
+stopIcyMetadata();
 renderTransport();
 syncMediaState("paused");
 });
@@ -3892,6 +3910,8 @@ return el;
 
 function disposeAudio(){
 if(recorder)stopRecording(true);
+stopIcyMetadata();
+streamMeta=null;
 saveActiveResume(true);
 clearSeekHover();
 if(hls){
@@ -3924,6 +3944,7 @@ if(!src)return;
 const dur=el.duration;
 const live=!isFinite(dur)||dur<=0;
 state.live=live;
+if(live&&src.kind==="url"&&!isHlsUrl(src.url)&&!icyController)startIcyMetadata(src,playToken);
 if(!live&&src.kind!=="dir"&&(!src.duration||Math.abs(src.duration-dur)>0.6)){
 src.duration=dur;
 saveSources();
@@ -4282,6 +4303,188 @@ hlsLoading.catch(()=>{hlsLoading=null;});
 return hlsLoading;
 }
 
+function streamMetaFor(src){
+if(!src||src.kind!=="url")return null;
+return streamMeta&&streamMeta.srcId===src.id?streamMeta:null;
+}
+function streamMetaText(src){
+const meta=streamMetaFor(src);
+if(!meta)return "";
+const parts=[];
+if(meta.title)parts.push("Title: "+meta.title);
+if(meta.artist)parts.push("Artist: "+meta.artist);
+if(meta.album)parts.push("Album: "+meta.album);
+return parts.join(" · ");
+}
+function tagMetaParts(meta,title){
+const parts=[];
+if(title)parts.push(["Title",title]);
+if(meta&&meta.artist&&meta.artist!==title)parts.push(["Artist",meta.artist]);
+if(meta&&meta.album&&meta.album!==title)parts.push(["Album",meta.album]);
+return parts;
+}
+function tagMetaText(meta,title){
+return tagMetaParts(meta,title).map(part=>part[0]+": "+part[1]).join(" · ");
+}
+function tagMetaMarkup(meta,title){
+return tagMetaParts(meta,title).map(part=>part[0]+': <span class="meta-val">'+esc(part[1])+"</span>").join(" · ");
+}
+function streamMetaMarkup(src){
+const meta=streamMetaFor(src);
+if(!meta)return "";
+const parts=[];
+if(meta.title)parts.push('Title: <span class="meta-val">'+esc(meta.title)+"</span>");
+if(meta.artist)parts.push('Artist: <span class="meta-val">'+esc(meta.artist)+"</span>");
+if(meta.album)parts.push('Album: <span class="meta-val">'+esc(meta.album)+"</span>");
+return parts.join(" · ");
+}
+function stopIcyMetadata(){
+if(icyController){
+try{icyController.abort();}catch(e){}
+icyController=null;
+}
+}
+function setStreamMeta(src,artist,title,album){
+if(!src||src.kind!=="url")return;
+const nextArtist=String(artist||"").trim();
+const nextTitle=String(title||"").trim();
+const nextAlbum=String(album||"").trim();
+if(!nextArtist&&!nextTitle&&!nextAlbum)return;
+if(streamMeta&&streamMeta.srcId===src.id&&streamMeta.artist===nextArtist&&streamMeta.title===nextTitle&&streamMeta.album===nextAlbum)return;
+streamMeta={srcId:src.id,artist:nextArtist,title:nextTitle,album:nextAlbum};
+const now=currentSource();
+if(!now||now.id!==src.id)return;
+renderPlayer();
+if(!els.stage.hidden)renderStage();
+}
+function setIcyTitle(src,raw){
+const value=String(raw||"").trim();
+if(!value)return;
+const split=value.indexOf(" - ");
+if(split>0)setStreamMeta(src,value.slice(0,split).trim(),value.slice(split+3).trim());
+else setStreamMeta(src,"",value);
+}
+function concatBytes(parts){
+let total=0;
+for(const part of parts)total+=part.length;
+const out=new Uint8Array(total);
+let offset=0;
+for(const part of parts){
+out.set(part,offset);
+offset+=part.length;
+}
+return out;
+}
+function startIcyMetadata(src,token){
+stopIcyMetadata();
+if(!src||src.kind!=="url"||isHlsUrl(src.url))return;
+if(typeof fetch!=="function"||typeof TextDecoder==="undefined")return;
+const controller=new AbortController();
+icyController=controller;
+fetch(src.url,{headers:{"Icy-MetaData":"1"},mode:"cors",cache:"no-store",signal:controller.signal})
+.then(async response=>{
+if(!response.ok||!response.body||token!==playToken)return;
+const metaint=Number(response.headers.get("icy-metaint"));
+if(!metaint||metaint<=0)return;
+const reader=response.body.getReader();
+const decoder=new TextDecoder("utf-8");
+let buffer=new Uint8Array(0);
+let audioLeft=metaint;
+let phase=0;
+let metaNeed=0;
+let metaParts=[];
+while(true){
+const {done,value}=await reader.read();
+if(done||token!==playToken)break;
+if(value&&value.length){
+const merged=new Uint8Array(buffer.length+value.length);
+merged.set(buffer);
+merged.set(value,buffer.length);
+buffer=merged;
+}
+let pos=0;
+while(pos<buffer.length){
+if(phase===0){
+const take=Math.min(audioLeft,buffer.length-pos);
+audioLeft-=take;
+pos+=take;
+if(audioLeft>0)break;
+phase=1;
+}else if(phase===1){
+metaNeed=buffer[pos]*16;
+pos++;
+if(!metaNeed){
+phase=0;
+audioLeft=metaint;
+continue;
+}
+phase=2;
+metaParts=[];
+}else{
+const take=Math.min(metaNeed,buffer.length-pos);
+if(take>0){
+metaParts.push(buffer.slice(pos,pos+take));
+pos+=take;
+metaNeed-=take;
+}
+if(metaNeed>0)break;
+phase=0;
+audioLeft=metaint;
+const text=decoder.decode(concatBytes(metaParts)).replace(/\0+$/,"");
+metaParts=[];
+const match=text.match(/StreamTitle='([^']*)'/i)||text.match(/StreamTitle="([^"]*)"/i);
+if(match&&match[1])setIcyTitle(src,match[1]);
+}
+}
+buffer=buffer.slice(pos);
+}
+if(icyController===controller)icyController=null;
+})
+.catch(()=>{});
+}
+function id3FrameText(bytes,start){
+const encoding=bytes[start];
+const offset=start+1;
+let end=offset;
+if(encoding===0||encoding===3){
+while(end<bytes.length&&bytes[end]!==0)end++;
+return new TextDecoder(encoding===3?"utf-8":"iso-8859-1").decode(bytes.slice(offset,end)).trim();
+}
+while(end+1<bytes.length&&!(bytes[end]===0&&bytes[end+1]===0))end+=2;
+return new TextDecoder("utf-16").decode(bytes.slice(offset,end)).trim();
+}
+function readId3Frames(bytes){
+if(!bytes||bytes.length<11)return null;
+let offset=0;
+let end=bytes.length;
+if(bytes[0]===0x49&&bytes[1]===0x44&&bytes[2]===0x33&&bytes.length>=10){
+const flags=bytes[5];
+const size=((bytes[6]&0x7f)<<21)|((bytes[7]&0x7f)<<14)|((bytes[8]&0x7f)<<7)|(bytes[9]&0x7f);
+offset=10+(flags&0x10?10:0);
+end=Math.min(end,offset+size);
+}
+const frames={};
+while(offset+10<=end){
+const id=String.fromCharCode(bytes[offset],bytes[offset+1],bytes[offset+2],bytes[offset+3]);
+if(!/^[A-Z0-9]{4}$/.test(id))break;
+const size=((bytes[offset+4]&0x7f)<<21)|((bytes[offset+5]&0x7f)<<14)|((bytes[offset+6]&0x7f)<<7)|(bytes[offset+7]&0x7f);
+if(size<=0||offset+10+size>end)break;
+if(id==="TIT2"||id==="TPE1"||id==="TALB")frames[id]=id3FrameText(bytes,offset+10);
+offset+=10+size;
+}
+if(!frames.TIT2&&!frames.TPE1)return null;
+return {title:frames.TIT2||"",artist:frames.TPE1||"",album:frames.TALB||""};
+}
+function applyHlsMetadata(src,data){
+const samples=(data&&data.samples)||[];
+for(const sample of samples){
+const frames=readId3Frames(sample&&sample.data);
+if(frames&&(frames.title||frames.artist)){
+setStreamMeta(src,frames.artist,frames.title,frames.album);
+break;
+}
+}
+}
 async function startHls(src,token){
 disposeAudio();
 const el=makeAudio(()=>{});
@@ -4302,6 +4505,12 @@ hls.on(Hls.Events.MANIFEST_PARSED,()=>{
 if(token!==playToken)return;
 el.play().catch(()=>toast("Press play to start"));
 });
+if(Hls.Events.FRAG_PARSING_METADATA){
+hls.on(Hls.Events.FRAG_PARSING_METADATA,(event,data)=>{
+if(token!==playToken)return;
+applyHlsMetadata(src,data);
+});
+}
 hls.loadSource(src.url);
 hls.attachMedia(el);
 }catch(e){
@@ -5134,7 +5343,11 @@ toast("Playing without saving");
 function openRename(id){
 const src=getSource(id);
 if(!src)return;
+const isUrl=src.kind==="url";
+els.renameTitle.textContent=isUrl?"Edit stream":"Rename source";
 els.renameInput.value=src.name;
+els.renameUrl.value=isUrl?src.url:"";
+els.renameUrlField.hidden=!isUrl;
 els.renameErr.hidden=true;
 els.renameModal.hidden=false;
 els.renameModal.dataset.id=id;
@@ -5161,13 +5374,37 @@ const name=els.renameInput.value.trim();
 if(!name){
 els.renameErr.textContent="Enter a reference name.";
 els.renameErr.hidden=false;
+els.renameInput.focus();
 return;
 }
+let url=src.url;
+if(src.kind==="url"){
+url=els.renameUrl.value.trim();
+if(!isHttpUrl(url)){
+els.renameErr.textContent="Enter a valid http(s) stream URL.";
+els.renameErr.hidden=false;
+els.renameUrl.focus();
+return;
+}
+}
+const urlChanged=src.kind==="url"&&url!==src.url;
+const wasCurrent=state.currentId===id;
+const wasPlaying=wasCurrent&&state.playing;
 src.name=name;
+if(urlChanged){
+src.url=url;
+delete src.meta;
+streamMeta=null;
+stopIcyMetadata();
+}
 saveSources();
 closeRename();
+if(urlChanged&&wasCurrent){
+disposeAudio();
+if(wasPlaying)playSource(id,true);
+}
 render();
-toast("Source renamed");
+toast(urlChanged?"Stream URL updated":"Source renamed");
 }
 
 async function moveSource(id,delta){
@@ -6021,6 +6258,12 @@ els.renameClose.addEventListener("click",closeRename);
 els.renameCancel.addEventListener("click",closeRename);
 els.renameSave.addEventListener("click",saveRename);
 els.renameInput.addEventListener("keydown",event=>{
+if(event.key==="Enter"){
+event.preventDefault();
+saveRename();
+}
+});
+els.renameUrl.addEventListener("keydown",event=>{
 if(event.key==="Enter"){
 event.preventDefault();
 saveRename();
