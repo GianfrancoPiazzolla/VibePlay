@@ -78,7 +78,7 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 | 🎧 | **Audiobook-first** | Bookmarks, resume points, variable speed, sleep timer and folder books built for long-form listening. |
 | 📂 | **Local files & folders** | Pick an audio file, or drop files and whole folders anywhere on the page. |
 | 📑 | **Chapter list** | Open any folder as a chapter list, jump straight to a track and see which one is playing. |
-| 🌐 | **Direct streams & HLS** | Play direct audio URLs and `.m3u8` HLS streams (native on Safari, via `hls.js` elsewhere), with live ICY or HLS ID3 titles labelled Title/Artist/Album when the server provides them. |
+| 🌐 | **Direct streams & HLS** | Play direct audio/video URLs and `.m3u8` HLS streams (native on Safari, via `hls.js` elsewhere). Live ICY or HLS ID3 titles are labelled Title/Artist/Album when the server provides them. |
 | 🏷️ | **Named sources** | Save each source under a reference name; rename it or edit its stream URL any time with the ✏️ button. |
 | 🧭 | **Queue control** | Move sources ⬆️⬇️, drag rows to reorder, filter with the 🔍 search box. |
 | 🚫 | **Exclude from playlist** | Keep a source in the library but skip it in the queue with the 👁️‍🗨️ toggle. |
@@ -96,7 +96,7 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 | 🎛️ | **Seekbar intelligence** | Hover markers for bookmarks and resume points, plus ±30 s jump buttons. |
 | 🖥️ | **Media Session** | Track metadata and OS media keys where supported. |
 | 📦 | **Backup & restore** | Export/import the whole library as JSON, with **merge** or **overwrite**. |
-| 🌙 | **Polished dark UI** | Responsive layout, OLED-style digital display with artwork backdrop, full-screen Now Playing view, sticky dialogs, toasts and reduced-motion support. |
+| 🌙 | **Polished dark UI** | Responsive layout, OLED-style digital display with artwork backdrop, full-screen Now Playing view with uncropped cover art or video (original aspect ratio preserved), sticky dialogs, toasts and reduced-motion support. |
 | ♿ | **Keyboard & screen readers** | Seekbar exposed as a slider, focus trapping in dialogs, live announcements, chapter navigation by key. |
 | 🎛️ | **5-band equalizer** | 60/230/910/3.6k/14k Hz, ±12 dB, eight presets, Bass Boost and zero reset — saved per source. |
 | 🔴 | **Record playback** | Captures the equalized output as WebM/Opus with a custom name, a red REC timer and automatic stop on pause or track change. |
@@ -109,11 +109,11 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 
 ```
 🖥️  digital display →  title marquee · state LED · source name · track counter
-📊  readouts       →  format · bitrate · file size · shuffle · repeat · speed · sleep · volume · A-B · skip · EQ · REC · MIC
+📊  readouts       →  format · VIDEO flag · bitrate · file size · shuffle · repeat · speed · sleep · volume · A-B · skip · EQ · REC · MIC
 ⏯️  status chip    →  play / pause by clicking the LED chip
 🖼️  artwork        →  cover art from tags, blurred behind the display
 🔍  seekbar        →  hover any point for its time, markers for bookmarks and resume
-🖥️  Now Playing    →  full-screen view with cover art, progress and transport
+🖥️  Now Playing    →  full-screen view with cover art, video for video streams, progress and transport
 📈  waveform       →  local tracks · 🌈 live spectrum  →  analysers
 🎯  seekbar        →  bookmarks 🔖 and resume points 🟢 markers
 ⏱️  times          →  current · ±30 s · duration / LIVE
@@ -130,8 +130,8 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 |---|---|---|
 | 💻 | **Local file** | Single audio file from your device, kept in IndexedDB for one-click access. |
 | 📁 | **Folder** | Drop a folder for a recursive scan; every audio file becomes a track, sorted by name. |
-| 🎧 | **Audio URL** | Direct links to `.mp3`, `.m4a`, `.aac`, `.ogg`, `.oga`, `.opus`, `.wav`, `.flac`, `.webm`, `.aif`, `.aiff`. Live ICY titles appear when the stream allows CORS; HLS streams expose timed ID3 metadata. |
-| 📡 | **HLS stream** | `.m3u8` playlists, with native support on Safari and `hls.js` on other browsers. |
+| 🎧 | **Audio / video URL** | Direct links to audio (`.mp3`, `.m4a`, `.aac`, `.ogg`, `.oga`, `.opus`, `.wav`, `.flac`, `.aif`, `.aiff`) and video (`.mp4`, `.webm`, `.mov`). Video streams are played through a `<video>` element: audio is heard normally, while the picture is shown only in Now Playing. Live ICY titles appear when the stream allows CORS. |
+| 📡 | **HLS stream** | `.m3u8` playlists, with native support on Safari and `hls.js` on other browsers. HLS playlists that carry video are marked `HLS · VIDEO` in the format chip and display their picture in Now Playing; outside that view only the audio track is played. |
 
 ---
 
@@ -225,10 +225,10 @@ Open **DATA** 🗄️ in the header to:
 | Icon | Technology |
 |---|---|
 | 🧱 | **HTML5 + CSS3 + vanilla JavaScript** — one self-contained `index.html`. |
-| 🎧 | **HTMLAudioElement** for playback and **Media Session API** for OS integration. |
+| 🎧 | **HTMLAudioElement** for local audio, **HTMLVideoElement** for remote streams (audio-only outside Now Playing) and **Media Session API** for OS integration. |
 | 🌈 | **Web Audio API** — five biquad filters for the equalizer, an analyser node for the spectrum, `MediaRecorder` for local recordings, `getUserMedia` for microphone capture, `fetch` with `Icy-MetaData` for ICY stream titles, `decodeAudioData` for the waveform. |
 | 🗃️ | **IndexedDB** for file/folder handles, **localStorage** for the library. |
-| 📡 | **hls.js** loaded on demand from jsDelivr for non-Safari HLS playback, including timed ID3 metadata for live titles. |
+| 📡 | **hls.js** loaded on demand from jsDelivr for non-Safari HLS playback, including timed ID3 metadata for live titles and auto-detection of video tracks. |
 | 🧾 | **ID3v2 / ID3v1** tag parsing for title, artist and album, with cover art from **APIC** frames and **FLAC PICTURE** blocks. |
 | ⚙️ | **No frameworks, no bundler, no dependencies to install** 🎉 |
 
