@@ -297,6 +297,7 @@ border:1px solid #16262e;background:#071116;font:800 8px ui-monospace,Menlo,mono
 color:#57707d;
 }
 .chip{color:#7b93a2}
+.chip.video{color:#fbbf24;border-color:#4a3a1a;background:#1a1408}
 .led::before{content:"";width:4px;height:4px;border-radius:50%;background:#22343d;flex:none}
 .led.on{color:#a5f3fc;border-color:#1d4a55;background:#0a2028;box-shadow:0 0 10px #22d3ee1f}
 .led.on::before{background:#22d3ee;box-shadow:0 0 6px #22d3ee}
@@ -659,8 +660,10 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 .stage-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:none}
 .stage-label{font:800 9.5px var(--mono);letter-spacing:.22em;color:#748095}
 .stage-cover{position:relative;flex:1;min-height:0;display:grid;place-items:center;border-radius:var(--r-lg);border:1px solid #1d3944;background:linear-gradient(145deg,#0d1a21,#060c11);overflow:hidden;box-shadow:0 24px 60px #0000008c,inset 0 0 80px #22d3ee14}
-.stage-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+.stage-cover img,.stage-cover video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;display:none}
 .stage.has-art .stage-cover img{display:block}
+.stage.has-video .stage-cover video{display:block}
+.stage.has-video .stage-cover img{display:none}
 .stage-cover svg{color:#22d3ee;opacity:.45}
 .stage-meta{flex:none;text-align:center}
 .stage-title{margin:0;font-size:21px;font-weight:800;line-height:1.2;color:#f0fdff;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
@@ -1212,7 +1215,8 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 </div>
 <div class="stage-cover">
 <svg viewBox="0 0 24 24" width="54" height="54" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="12" r="3.1" fill="currentColor"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="currentColor" stroke-width="1.1" opacity=".5" stroke-linecap="round"/></svg>
-<img id="stageCoverImg" alt="">
+<img id="stagePoster" alt="">
+<video id="stageCoverImg" playsinline preload="auto" aria-hidden="true"></video>
 </div>
 <div class="stage-meta">
 <h2 class="stage-title" id="stageTitle">Nothing playing</h2>
@@ -1929,15 +1933,12 @@ els.stageTitle.textContent=title;
 els.stageSub.innerHTML=els.trackSub.innerHTML||"";
 const key=currentCoverKey();
 const art=key?coverCache.get(key):null;
-if(art&&art.url){
-els.stageArt.style.backgroundImage='url("'+art.url+'")';
-els.stageCoverImg.src=art.url;
+const artUrl=art&&art.url?art.url:"./icon-512x512.png";
+els.stageArt.style.backgroundImage='url("'+artUrl+'")';
+els.stagePoster.src=artUrl;
+els.stageCoverImg.poster=artUrl;
 els.stage.classList.add("has-art");
-}else{
-els.stageArt.style.backgroundImage='url("./icon-512x512.png")';
-els.stageCoverImg.src='./icon-512x512.png';
-els.stage.classList.add("has-art");
-}
+els.stage.classList.toggle("has-video",streamVideoFor(src));
 }
 function openStage(){
 if(!currentSource()){
@@ -3100,6 +3101,7 @@ let graphNodes=[];
 let objectUrl=null;
 let hls=null;
 let streamMeta=null;
+let streamVideo=null;
 let icyController=null;
 let analyserActive=false;
 let playToken=0;
@@ -3200,6 +3202,7 @@ abErr:$("#abErr"),
 stage:$("#stage"),
 stageArt:$("#stageArt"),
 stageClose:$("#stageClose"),
+stagePoster:$("#stagePoster"),
 stageCoverImg:$("#stageCoverImg"),
 stageTitle:$("#stageTitle"),
 stageSub:$("#stageSub"),
@@ -3567,7 +3570,17 @@ els.dState.classList.toggle("on",playing);
 els.dState.classList.toggle("live",!!state.live);
 els.dState.setAttribute("aria-label",playing?"Pause":"Play");
 els.dState.setAttribute("aria-pressed",playing?"true":"false");
-setText(els.dFmt,src?(src.kind==="url"?(isHlsUrl(src.url)?"HLS":"STREAM"):src.kind==="dir"&&!dirTrack?"FOLDER":fileFormatLabel(src.kind==="dir"?dirTrack.name:src.fileName)):"\u2014");
+let fmt="\u2014";
+if(src){
+if(src.kind==="url")fmt=isHlsUrl(src.url)?"HLS":"STREAM";
+else if(src.kind==="dir"&&!dirTrack)fmt="FOLDER";
+else fmt=fileFormatLabel(src.kind==="dir"?dirTrack.name:src.fileName);
+}
+const video=streamVideoFor(src);
+if(video)fmt+=" · VIDEO";
+setText(els.dFmt,fmt);
+els.dFmt.classList.toggle("video",!!video);
+els.dFmt.title=video?"Video stream: audio only outside Now Playing, video in Now Playing":"";
 const size=sourceSize(src,dirTrack);
 setText(els.dSize,size?fmtBytes(size):"\u2014");
 setText(els.dBits,src?(state.live?"LIVE":fmtBitrate(size,duration)||"\u2014"):"\u2014");
@@ -3850,8 +3863,12 @@ try{audio.playbackRate=effectiveRate();}catch(e){}
 applyPitch();
 }
 
-function makeAudio(onError){
-const el=new Audio();
+function noteVideo(el){
+if(audio!==el||el.tagName!=="VIDEO")return;
+const src=currentSource();
+if(src&&src.kind==="url"&&el.videoWidth>0)markStreamVideo(src,true);
+}
+function prepareMedia(el,onError){
 el.preload="auto";
 el.volume=state.settings.volume;
 el.muted=!!state.settings.muted;
@@ -3871,6 +3888,7 @@ if(liveSrc&&liveSrc.kind==="url"&&state.live&&!isHlsUrl(liveSrc.url)&&!icyContro
 renderTransport();
 resumeAudio();
 syncMediaState("playing");
+noteVideo(el);
 });
 el.addEventListener("pause",()=>{
 if(audio!==el)return;
@@ -3884,6 +3902,7 @@ syncMediaState("paused");
 el.addEventListener("timeupdate",()=>{
 if(audio!==el)return;
 saveActiveResume(false);
+noteVideo(el);
 });
 el.addEventListener("ended",()=>{
 if(audio!==el)return;
@@ -3894,7 +3913,11 @@ onEnded();
 el.addEventListener("loadedmetadata",()=>{
 if(audio!==el)return;
 onMetadata(el);
+noteVideo(el);
 });
+el.addEventListener("loadeddata",()=>noteVideo(el));
+el.addEventListener("resize",()=>noteVideo(el));
+el.addEventListener("playing",()=>noteVideo(el));
 el.addEventListener("durationchange",()=>{
 if(audio!==el)return;
 onMetadata(el);
@@ -3907,11 +3930,28 @@ else toast("Unable to play this source");
 audio=el;
 return el;
 }
+function makeAudio(onError){
+return prepareMedia(new Audio(),onError);
+}
+function makeVideo(onError){
+const el=document.createElement("video");
+el.playsInline=true;
+el.setAttribute("playsinline","");
+el.setAttribute("webkit-playsinline","");
+el.setAttribute("aria-hidden","true");
+const old=els.stageCoverImg;
+if(old&&old.parentNode)old.parentNode.replaceChild(el,old);
+el.id="stageCoverImg";
+els.stageCoverImg=el;
+return prepareMedia(el,onError);
+}
 
 function disposeAudio(){
 if(recorder)stopRecording(true);
 stopIcyMetadata();
 streamMeta=null;
+streamVideo=null;
+if(els.stage)els.stage.classList.remove("has-video");
 saveActiveResume(true);
 clearSeekHover();
 if(hls){
@@ -4307,6 +4347,24 @@ function streamMetaFor(src){
 if(!src||src.kind!=="url")return null;
 return streamMeta&&streamMeta.srcId===src.id?streamMeta:null;
 }
+function streamVideoFor(src){
+return !!(src&&src.kind==="url"&&streamVideo&&streamVideo.srcId===src.id&&streamVideo.has);
+}
+function markStreamVideo(src,has){
+if(!src||src.kind!=="url")return;
+if(!has){
+if(!streamVideo||streamVideo.srcId!==src.id||!streamVideo.has)return;
+streamVideo={srcId:src.id,has:false};
+}else{
+if(streamVideo&&streamVideo.srcId===src.id&&streamVideo.has)return;
+streamVideo={srcId:src.id,has:true};
+}
+const now=currentSource();
+if(now&&now.id===src.id){
+renderDisplay();
+renderStage();
+}
+}
 function streamMetaText(src){
 const meta=streamMetaFor(src);
 if(!meta)return "";
@@ -4487,7 +4545,7 @@ break;
 }
 async function startHls(src,token){
 disposeAudio();
-const el=makeAudio(()=>{});
+const el=makeVideo(()=>{});
 attachAnalyser(el);
 resumeAudio();
 try{
@@ -4501,10 +4559,16 @@ if(data&&data.fatal&&token===playToken){
 toast("Stream error: "+(data.details||"fatal"));
 }
 });
+const detectVideo=()=>{
+if(token!==playToken)return;
+if(el.videoWidth>0)markStreamVideo(src,true);
+};
 hls.on(Hls.Events.MANIFEST_PARSED,()=>{
 if(token!==playToken)return;
 el.play().catch(()=>toast("Press play to start"));
 });
+hls.on(Hls.Events.LEVEL_LOADED,detectVideo);
+hls.on(Hls.Events.FRAG_PARSING_INIT_SEGMENT,detectVideo);
 if(Hls.Events.FRAG_PARSING_METADATA){
 hls.on(Hls.Events.FRAG_PARSING_METADATA,(event,data)=>{
 if(token!==playToken)return;
@@ -4522,7 +4586,7 @@ function startRemoteDirect(src,token){
 if(token!==playToken)return;
 disposeAudio();
 if(token!==playToken)return;
-const el=makeAudio(()=>{
+const el=makeVideo(()=>{
 if(token===playToken)toast("Unable to play this stream");
 });
 el.src=src.url;
@@ -4548,7 +4612,7 @@ if(fellBack||token!==playToken)return;
 fellBack=true;
 startRemoteDirect(src,token);
 };
-const el=makeAudio(fallback);
+const el=makeVideo(fallback);
 el.crossOrigin="anonymous";
 attachAnalyser(el);
 resumeAudio();
