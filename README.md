@@ -96,7 +96,7 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 | 🎛️ | **Seekbar intelligence** | Hover markers for bookmarks and resume points, plus ±30 s jump buttons. |
 | 🖥️ | **Media Session** | Track metadata and OS media keys where supported. |
 | 📦 | **Backup & restore** | Export/import the whole library as JSON, with **merge** or **overwrite**, or recover a backup from a URL. |
-| 🌙 | **Polished dark UI** | Responsive layout, OLED-style digital display with artwork backdrop, full-screen Now Playing view using 95% of the viewport width, with uncropped cover art or video (original aspect ratio preserved), a fullscreen stage with discreet tap-to-reveal play/pause and volume controls, sticky dialogs, toasts and reduced-motion support. |
+| 🌙 | **Polished dark UI** | Responsive layout, OLED-style digital display with artwork backdrop, a sources panel that fills all the remaining vertical space and scrolls internally, a full-screen Now Playing view, with uncropped cover art or video (original aspect ratio preserved), a fullscreen stage with discreet tap-to-reveal play/pause and volume controls, sticky dialogs, toasts and reduced-motion support. |
 | ♿ | **Keyboard & screen readers** | Seekbar exposed as a slider, focus trapping in dialogs, live announcements, chapter navigation by key. |
 | 🎛️ | **5-band equalizer** | 60/230/910/3.6k/14k Hz, ±12 dB, eight presets, Bass Boost and zero reset — saved per source. |
 | 🔴 | **Record playback** | Captures the equalized output as WebM/Opus with a custom name, a red REC timer and automatic stop on pause or track change. |
