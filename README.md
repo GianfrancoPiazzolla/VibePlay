@@ -39,11 +39,11 @@
 
 ## 🌟 What is VibePlay?
 
-VibePlay is a **single-page music player** that runs entirely in your browser. Load a local audio file, a whole folder, or a direct stream URL, give each one a **reference name**, and it becomes a reusable *source* in your personal library. Build a queue, reorder it by drag & drop, skip what you don't want, and keep listening with shuffle, repeat, bookmarks, resume points, a sleep timer and variable playback speed.
+VibePlay is a **single-page media player** that runs entirely in your browser. Load a local audio or video file, a whole folder, or a direct stream URL, give each one a **reference name**, and it becomes a reusable *source* in your personal library. Build a queue, reorder it by drag & drop, skip what you don't want, and keep listening with shuffle, repeat, bookmarks, resume points, a sleep timer and variable playback speed.
 
 > 🎧 **Audiobook-first by design.** Long narrations, books split into dozens of files, chapters to revisit and sessions that end with you falling asleep — those are the needs VibePlay was built around.
 
-> 🛡️ **Nothing is uploaded.** Audio never leaves your device: the app only stores source metadata, settings, bookmarks and resume positions inside your browser.
+> 🛡️ **Nothing is uploaded.** Media never leaves your device: the app only stores source metadata, settings, bookmarks and resume positions inside your browser.
 
 ---
 
@@ -64,7 +64,7 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 | ⏪ **Re-listen to the last sentence** | Dedicated −30 s / +30 s buttons, plus 5 s and 30 s arrow-key seeks. |
 | 🏷️ **Book and author metadata** | ID3v2 / ID3v1 parsing for title, artist and album — album often carries the book title. |
 | 🔍 **Large libraries** | Reference names, instant filtering and drag & drop queue ordering keep hundreds of books manageable. |
-| 💾 **Move your library** | JSON backup and restore with merge or overwrite, so bookmarks and resume points travel with you. |
+| 💾 **Move your library** | JSON backup and restore with merge or overwrite, plus online recovery from a URL, so bookmarks and resume points travel with you. |
 | 📴 **Listen offline** | A service worker caches the app shell, and every local file stays on your device. |
 
 > 🎯 In short: music players optimize for three-minute songs. **VibePlay optimizes for chapters, hours and the bookmark you left at 2 a.m.** 🌙🔖
@@ -76,7 +76,7 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 | | Feature | Description |
 |---|---|---|
 | 🎧 | **Audiobook-first** | Bookmarks, resume points, variable speed, sleep timer and folder books built for long-form listening. |
-| 📂 | **Local files & folders** | Pick an audio file, or drop files and whole folders anywhere on the page. |
+| 📂 | **Local files & folders** | Pick an audio/video file, or drop files and whole folders anywhere on the page. |
 | 📑 | **Chapter list** | Open any folder as a chapter list, jump straight to a track and see which one is playing. |
 | 🌐 | **Direct streams & HLS** | Play direct audio/video URLs and `.m3u8` HLS streams (native on Safari, via `hls.js` elsewhere). Live ICY or HLS ID3 titles are labelled Title/Artist/Album when the server provides them. |
 | 🏷️ | **Named sources** | Save each source under a reference name; rename it or edit its stream URL any time with the ✏️ button. |
@@ -95,8 +95,8 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 | 📊 | **Waveform & spectrum** | Decoded waveform for local tracks and a live spectrum analyzer for playing audio. |
 | 🎛️ | **Seekbar intelligence** | Hover markers for bookmarks and resume points, plus ±30 s jump buttons. |
 | 🖥️ | **Media Session** | Track metadata and OS media keys where supported. |
-| 📦 | **Backup & restore** | Export/import the whole library as JSON, with **merge** or **overwrite**. |
-| 🌙 | **Polished dark UI** | Responsive layout, OLED-style digital display with artwork backdrop, full-screen Now Playing view with uncropped cover art or video (original aspect ratio preserved), sticky dialogs, toasts and reduced-motion support. |
+| 📦 | **Backup & restore** | Export/import the whole library as JSON, with **merge** or **overwrite**, or recover a backup from a URL. |
+| 🌙 | **Polished dark UI** | Responsive layout, OLED-style digital display with artwork backdrop, full-screen Now Playing view using 95% of the viewport width, with uncropped cover art or video (original aspect ratio preserved), a fullscreen stage with discreet tap-to-reveal play/pause and volume controls, sticky dialogs, toasts and reduced-motion support. |
 | ♿ | **Keyboard & screen readers** | Seekbar exposed as a slider, focus trapping in dialogs, live announcements, chapter navigation by key. |
 | 🎛️ | **5-band equalizer** | 60/230/910/3.6k/14k Hz, ±12 dB, eight presets, Bass Boost and zero reset — saved per source. |
 | 🔴 | **Record playback** | Captures the equalized output as WebM/Opus with a custom name, a red REC timer and automatic stop on pause or track change. |
@@ -113,7 +113,7 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 ⏯️  status chip    →  play / pause by clicking the LED chip
 🖼️  artwork        →  cover art from tags, blurred behind the display
 🔍  seekbar        →  hover any point for its time, markers for bookmarks and resume
-🖥️  Now Playing    →  full-screen view with cover art, video for video streams, progress and transport
+🖥️  Now Playing    →  full-screen view with cover art, video for video sources, fullscreen stage and transport
 📈  waveform       →  local tracks · 🌈 live spectrum  →  analysers
 🎯  seekbar        →  bookmarks 🔖 and resume points 🟢 markers
 ⏱️  times          →  current · ±30 s · duration / LIVE
@@ -122,15 +122,17 @@ VibePlay is not a generic player with audiobook support bolted on: **its feature
 🔁  transport      →  shuffle · previous · play · next · repeat
 ```
 
+> ⛶ The fullscreen button on the cover/video stage uses the Fullscreen API. A nearly transparent bottom overlay provides play/pause and volume: tap the video or cover to reveal it, and it fades again after a few seconds. Use the fullscreen button or <kbd>Esc</kbd> to return to the normal Now Playing view.
+
 ---
 
 ## 🎵 Supported Sources
 
 | Icon | Type | Details |
 |---|---|---|
-| 💻 | **Local file** | Single audio file from your device, kept in IndexedDB for one-click access. |
-| 📁 | **Folder** | Drop a folder for a recursive scan; every audio file becomes a track, sorted by name. |
-| 🎧 | **Audio / video URL** | Direct links to audio (`.mp3`, `.m4a`, `.aac`, `.ogg`, `.oga`, `.opus`, `.wav`, `.flac`, `.aif`, `.aiff`) and video (`.mp4`, `.webm`, `.mov`). Video streams are played through a `<video>` element: audio is heard normally, while the picture is shown only in Now Playing. Live ICY titles appear when the stream allows CORS. |
+| 💻 | **Local file** | Single audio or video file from your device, kept in IndexedDB for one-click access. |
+| 📁 | **Folder** | Drop a folder for a recursive scan; every audio or video file becomes a track, sorted by name. |
+| 🎧 | **Audio / video URL** | Direct links to audio (`.mp3`, `.m4a`, `.aac`, `.ogg`, `.oga`, `.opus`, `.wav`, `.flac`, `.aif`, `.aiff`) and video (`.mp4`, `.m4v`, `.webm`, `.mov`, `.ogv`). Video streams are played through a `<video>` element: audio is heard normally, while the picture is shown only in Now Playing, where it can also go fullscreen. Live ICY titles appear when the stream allows CORS. |
 | 📡 | **HLS stream** | `.m3u8` playlists, with native support on Safari and `hls.js` on other browsers. HLS playlists that carry video are marked `HLS · VIDEO` in the format chip and display their picture in Now Playing; outside that view only the audio track is played. |
 
 ---
@@ -153,7 +155,7 @@ python -m http.server 8080
 
 ### 🎬 First steps
 
-1. ➕ Click **+** (or drop an audio file / folder on the page).
+1. ➕ Click **+** (or drop an audio/video file or folder on the page).
 2. 🏷️ Type a reference name, choose **LOCAL FILE** or **STREAM URL**.
 3. 💾 Keep **Save to my sources** on for later, or turn it off for a 🟡 TEMP source.
 4. ▶️ Hit **PLAY**, then drag rows to order your queue. 🎉
@@ -189,6 +191,7 @@ VibePlay is **100 % client-side** 🛡️ — no accounts, no analytics, no serv
 | 🔖 | Bookmarks | `localStorage` → `vibeplay.bookmarks.v1` |
 | ⏱️ | Resume points | `localStorage` → `vibeplay.resume.v1` |
 | 📎 | Local file/folder handles | IndexedDB → `vibeplay` / `handles` |
+| 🔗 | Last online backup URL | IndexedDB → `vibeplay` / `backup:url` |
 
 > 🧹 Clearing site data resets the library. Local sources may then need a new file picker selection via **RELINK** 🔗.
 > 🟡 **TEMP** sources are intentionally never persisted.
@@ -200,9 +203,12 @@ VibePlay is **100 % client-side** 🛡️ — no accounts, no analytics, no serv
 Open **DATA** 🗄️ in the header to:
 
 - 📤 **Export backup** — a JSON file with sources, settings, bookmarks and resume points.
-- 📥 **Import backup** — preview a summary, then choose:
+- 📥 **Import backup** — choose a local JSON file or fetch a backup from a URL. Pastebin page links are converted to their raw endpoint automatically, and the URL is remembered in IndexedDB for the next import.
+- 👀 **Preview** — both import methods show the same summary, then offer the identical flow:
   - 🧩 **MERGE** — add new sources and bookmarks, keep your current settings.
   - ♻️ **OVERWRITE** — replace everything, including volume and speed.
+
+> 🌐 Direct URLs must allow browser access (CORS). Pastebin blocks direct cross-origin requests, so Pastebin links use a public reader fallback; use a CORS-enabled direct JSON URL when you prefer no fallback.
 
 ```json
 {
@@ -216,7 +222,7 @@ Open **DATA** 🗄️ in the header to:
 }
 ```
 
-> 🎵 Audio files are **not** included in backups: local files and folders must be relinked on the new device.
+> 🎵 Media files are **not** included in backups: local files and folders must be relinked on the new device.
 
 ---
 
@@ -225,7 +231,7 @@ Open **DATA** 🗄️ in the header to:
 | Icon | Technology |
 |---|---|
 | 🧱 | **HTML5 + CSS3 + vanilla JavaScript** — one self-contained `index.html`. |
-| 🎧 | **HTMLAudioElement** for local audio, **HTMLVideoElement** for remote streams (audio-only outside Now Playing) and **Media Session API** for OS integration. |
+| 🎧 | **HTMLAudioElement** for local audio, **HTMLVideoElement** for local/remote video and video streams (audio-only outside Now Playing), **Fullscreen API** for the stage and **Media Session API** for OS integration. |
 | 🌈 | **Web Audio API** — five biquad filters for the equalizer, an analyser node for the spectrum, `MediaRecorder` for local recordings, `getUserMedia` for microphone capture, `fetch` with `Icy-MetaData` for ICY stream titles, `decodeAudioData` for the waveform. |
 | 🗃️ | **IndexedDB** for file/folder handles, **localStorage** for the library. |
 | 📡 | **hls.js** loaded on demand from jsDelivr for non-Safari HLS playback, including timed ID3 metadata for live titles and auto-detection of video tracks. |
