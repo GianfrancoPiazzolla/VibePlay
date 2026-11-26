@@ -6178,7 +6178,7 @@ const top=lib.getBoundingClientRect().top+window.scrollY;
 const viewport=document.documentElement.clientHeight||window.innerHeight;
 const app=document.getElementById("app");
 const pad=app?parseFloat(getComputedStyle(app).paddingBottom)||0:0;
-const height=Math.max(300,Math.round(viewport-top-pad));
+const height=Math.max(280,Math.round(viewport-top-pad));
 lib.style.setProperty("--lib-h",height+"px");
 }
 function scheduleLibraryHeight(){
