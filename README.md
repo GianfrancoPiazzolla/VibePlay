@@ -203,12 +203,12 @@ VibePlay is **100 % client-side** 🛡️ — no accounts, no analytics, no serv
 Open **DATA** 🗄️ in the header to:
 
 - 📤 **Export backup** — a JSON file with sources, settings, bookmarks and resume points.
-- 📥 **Import backup** — choose a local JSON file or fetch a backup from a URL. Pastebin page links are converted to their raw endpoint automatically, and the URL is remembered in IndexedDB for the next import.
+- 📥 **Import backup** — choose a local JSON file or fetch a backup from a URL. Pastebin page links are converted to their raw endpoint automatically; Pastebin and TinyURL links are read through a public CORS fallback; TinyURL preview pages from the old API are resolved to their destination automatically. The URL is remembered in IndexedDB for the next import.
 - 👀 **Preview** — both import methods show the same summary, then offer the identical flow:
   - 🧩 **MERGE** — add new sources and bookmarks, keep your current settings.
   - ♻️ **OVERWRITE** — replace everything, including volume and speed.
 
-> 🌐 Direct URLs must allow browser access (CORS). Pastebin blocks direct cross-origin requests, so Pastebin links use a public reader fallback; use a CORS-enabled direct JSON URL when you prefer no fallback.
+> 🌐 Direct URLs must allow browser access (CORS). Pastebin blocks direct cross-origin requests and TinyURL redirects break CORS, so both use a public reader fallback; use a CORS-enabled direct JSON URL when you prefer no fallback.
 
 ```json
 {
