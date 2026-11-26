@@ -502,6 +502,7 @@ box-shadow:0 0 10px #22d3ee66;cursor:pointer;
 .data-copy{margin:0 0 8px;font-size:11.5px;line-height:1.6;color:#8b95a7}
 .data-copy b{color:#dbe3f0}
 .data-export,.data-pick{width:100%;margin-top:2px}
+.data-url{margin-top:10px}
 .data-sep{height:1px;background:var(--line);margin:16px 0}
 .data-summary{
 margin-top:10px;padding:10px 11px;border:1px solid var(--line);border-radius:9px;
@@ -656,7 +657,7 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 .stage[hidden]{display:none}
 .stage-art{position:absolute;inset:-12%;background-position:center;background-size:cover;filter:blur(60px) saturate(1.3);opacity:.35;transform:scale(1.08);pointer-events:none}
 .stage::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#05080cd9,#05080cf5 58%,#05080c);pointer-events:none}
-.stage-inner{position:relative;z-index:1;width:100%;max-width:520px;height:100%;display:flex;flex-direction:column;padding:18px 22px 26px;gap:14px}
+.stage-inner{position:relative;z-index:1;width:95vw;max-width:none;height:100%;display:flex;flex-direction:column;padding:18px 22px 26px;gap:14px}
 .stage-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:none}
 .stage-label{font:800 9.5px var(--mono);letter-spacing:.22em;color:#748095}
 .stage-cover{position:relative;flex:1;min-height:0;display:grid;place-items:center;border-radius:var(--r-lg);border:1px solid #1d3944;background:linear-gradient(145deg,#0d1a21,#060c11);overflow:hidden;box-shadow:0 24px 60px #0000008c,inset 0 0 80px #22d3ee14}
@@ -665,6 +666,25 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 .stage.has-video .stage-cover video{display:block}
 .stage.has-video .stage-cover img{display:none}
 .stage-cover svg{color:#22d3ee;opacity:.45}
+.stage-fs{position:absolute;top:10px;right:10px;z-index:4;width:34px;height:34px;display:grid;place-items:center;border-radius:9px;border:1px solid #ffffff2e;background:#05080cbb;color:#e6feff;cursor:pointer;backdrop-filter:blur(8px);opacity:.82}
+.stage-fs:hover,.stage-fs:focus-visible{opacity:1;border-color:#22d3ee;outline:none}
+.stage-fs svg{opacity:1}
+.stage-cover:fullscreen,.stage-cover:-webkit-full-screen{width:100%;height:100%;border:0;border-radius:0;background:#000;box-shadow:none}
+.stage-cover:fullscreen img,.stage-cover:fullscreen video,.stage-cover:-webkit-full-screen img,.stage-cover:-webkit-full-screen video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.stage-cover:fullscreen>svg,.stage-cover:-webkit-full-screen>svg{display:none}
+.stage-cover:fullscreen .stage-fs,.stage-cover:-webkit-full-screen .stage-fs{top:14px;right:14px;width:40px;height:40px;opacity:1}
+.stage-fsbar{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:4;display:none;align-items:center;gap:9px;max-width:calc(100% - 28px);padding:6px 10px;border:1px solid #ffffff24;border-radius:var(--r-pill);background:#05080ccc;backdrop-filter:blur(10px);opacity:.10;pointer-events:none;transition:opacity .25s}
+.stage-cover.fs-controls-on .stage-fsbar,.stage-fsbar:focus-within{opacity:.96;pointer-events:auto}
+.stage-fsbar:hover{opacity:1}
+.stage-cover:fullscreen .stage-fsbar,.stage-cover:-webkit-full-screen .stage-fsbar{display:flex}
+.stage-fs-play{flex:none;width:30px;height:30px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:#e6feff;cursor:pointer;padding:0}
+.stage-fs-play:hover,.stage-fs-play:focus-visible{background:#ffffff1a;outline:none}
+.stage-fs-play svg{width:18px;height:18px;opacity:1;color:#e6feff}
+#stageFsVol{-webkit-appearance:none;appearance:none;width:108px;height:4px;border-radius:4px;cursor:pointer;background:linear-gradient(90deg,var(--accent) var(--fill,80%),#ffffff2e var(--fill,80%));outline-offset:5px}
+#stageFsVol::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;background:#e6feff;border:1px solid #0e7490;box-shadow:0 0 8px #22d3ee66;cursor:pointer}
+#stageFsVol::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#e6feff;border:1px solid #0e7490;box-shadow:0 0 8px #22d3ee66;cursor:pointer}
+.stage-fs-volval{min-width:30px;text-align:right;font:700 9px var(--mono);color:#aab4c5;font-variant-numeric:tabular-nums}
+@media(max-width:560px){#stageFsVol{width:82px}.stage-fsbar{gap:7px;padding:5px 8px}}
 .stage-meta{flex:none;text-align:center}
 .stage-title{margin:0;font-size:21px;font-weight:800;line-height:1.2;color:#f0fdff;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .stage-sub{margin:5px 0 0;font:600 11px var(--mono);color:#7f93a4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -889,21 +909,21 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 </div>
 <div id="localPane">
 <div class="field">
-<label>Audio file or folder</label>
+<label>Audio/video file or folder</label>
 <div class="pick-row">
 <button class="pick" id="pickFile">CHOOSE FILE...</button>
 <button class="pick" id="pickDir">CHOOSE FOLDER...</button>
 </div>
 <div class="file-info" id="fileInfo">No file or folder selected</div>
 </div>
-<p class="hint">The audio never leaves your device. Keep saving on for one-click access later, or turn it off to play the file only for this session.</p>
+<p class="hint">Audio and video never leave your device. Keep saving on for one-click access later, or turn it off to play the file only for this session.</p>
 </div>
 <div id="urlPane" hidden>
 <div class="field">
 <label for="srcUrl">Stream URL</label>
 <input id="srcUrl" type="url" placeholder="https://example.com/track.mp3" spellcheck="false" autocomplete="off">
 </div>
-<p class="hint">Direct audio links (mp3, aac, ogg, wav, flac) and HLS .m3u8 streams. Save the link for later, or turn saving off to listen without storing it.</p>
+<p class="hint">Direct audio/video links (mp3, aac, ogg, wav, flac, mp4, m4v, webm, mov, ogv) and HLS .m3u8 streams. Save the link for later, or turn saving off to listen without storing it.</p>
 </div>
 <label class="save-row" for="saveSource">
 <span class="save-copy"><b>Save to my sources</b><small>Off: listen now without storing it in this browser</small></span>
@@ -1157,11 +1177,19 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <div class="modal-body">
 <p class="data-copy"><b>Export</b> saves sources, settings, bookmarks and resume points to a JSON file.</p>
 <button class="btn primary data-export" id="dataExport" type="button">EXPORT BACKUP</button>
-<p class="hint">Audio files are not included: local files and folders must be relinked or re-added on the other device.</p>
+<p class="hint">Media files are not included: local files and folders must be relinked or re-added on the other device.</p>
 <div class="data-sep"></div>
-<p class="data-copy"><b>Import</b> reads a backup made by VibePlay.</p>
+<p class="data-copy"><b>Import</b> reads a backup file or a backup URL.</p>
 <input type="file" id="dataFile" accept=".json,application/json" hidden>
 <button class="btn data-pick" id="dataPick" type="button">CHOOSE BACKUP FILE</button>
+<div class="data-url">
+<div class="field">
+<label for="dataUrl">Backup URL</label>
+<input id="dataUrl" type="url" placeholder="https://pastebin.com/raw/…" spellcheck="false" autocomplete="off">
+</div>
+<button class="btn data-pick" id="dataFetch" type="button">FETCH BACKUP</button>
+<p class="hint">Pastebin links are converted to raw automatically. The URL is saved on this device for the next import.</p>
+</div>
 <div class="data-summary" id="dataSummary" hidden></div>
 <p class="form-err" id="dataErr" hidden></p>
 <p class="hint">MERGE adds imported sources and bookmarks and keeps your settings; OVERWRITE replaces everything, including volume and speed.</p>
@@ -1198,7 +1226,7 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <div class="about-author-sub">Pushing the vibe coding era beyond!</div>
 </div>
 </div>
-<p class="about-desc"><b>Synopsis</b>: VibePlay is a single-page music player that runs entirely in your browser. Load a local audio file, a whole folder, or a direct stream URL, give each one a reference name, and it becomes a reusable source in your personal library. Build a queue, reorder it by drag & drop, skip what you don't want, and keep listening with shuffle, repeat, bookmarks, resume points, a sleep timer and variable playback speed.</p>
+<p class="about-desc"><b>Synopsis</b>: VibePlay is a single-page music player that runs entirely in your browser. Load a local audio or video file, a whole folder, or a direct stream URL, give each one a reference name, and it becomes a reusable source in your personal library. Build a queue, reorder it by drag & drop, skip what you don't want, and keep listening with shuffle, repeat, bookmarks, resume points, a sleep timer and variable playback speed.</p>
 <p class="about-desc"><b>GitHub repository</b>: <a href="https://github.com/GianfrancoPiazzolla/VibePlay" target="_blank" rel="noopener">VibePlay</a></p>
 <p class="about-desc"><b>More Apps</b>: <a href="https://github.com/GianfrancoPiazzolla?tab=repositories" target="_blank" rel="noopener">GitHub</a></p>
 <p class="about-desc"><b>License</b>: Distributed under the MIT License. Feel free to use, modify, and share.</p>
@@ -1213,10 +1241,16 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <span class="stage-label">NOW PLAYING</span>
 <button class="icon-btn" id="stageClose" type="button" aria-label="Close now playing">&times;</button>
 </div>
-<div class="stage-cover">
+<div class="stage-cover" id="stageCover">
 <svg viewBox="0 0 24 24" width="54" height="54" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="12" r="3.1" fill="currentColor"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="currentColor" stroke-width="1.1" opacity=".5" stroke-linecap="round"/></svg>
 <img id="stagePoster" alt="">
 <video id="stageCoverImg" playsinline preload="auto" aria-hidden="true"></video>
+<button class="stage-fs" id="stageFs" type="button" aria-label="Fullscreen" title="Fullscreen"></button>
+<div class="stage-fsbar" id="stageFsBar" role="group" aria-label="Fullscreen playback controls">
+<button class="stage-fs-play" id="stageFsPlay" type="button" aria-label="Play" title="Play"></button>
+<input id="stageFsVol" type="range" min="0" max="100" step="1" value="80" aria-label="Volume">
+<span class="stage-fs-volval" id="stageFsVolVal">80%</span>
+</div>
 </div>
 <div class="stage-meta">
 <h2 class="stage-title" id="stageTitle">Nothing playing</h2>
@@ -1239,14 +1273,14 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <div class="drop-icon">
 <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>
 </div>
-<div class="drop-title">Drop audio or a folder</div>
+<div class="drop-title">Drop audio, video or a folder</div>
 <div class="drop-sub">Choose whether to save or just listen</div>
 </div>
 </div>
 <p class="sr-only" id="srStatus" aria-live="polite"></p>
 <div id="toasts" aria-live="polite"></div>
-<input type="file" id="fallbackInput" accept="audio/*,.mp3,.m4a,.aac,.ogg,.oga,.opus,.wav,.flac,.webm,.aif,.aiff" hidden>
-<input type="file" id="dirFallbackInput" webkitdirectory directory multiple accept="audio/*,.mp3,.m4a,.aac,.ogg,.oga,.opus,.wav,.flac,.webm,.aif,.aiff" hidden>
+<input type="file" id="fallbackInput" accept="audio/*,video/*,.mp3,.m4a,.aac,.ogg,.oga,.opus,.wav,.flac,.webm,.aif,.aiff,.mp4,.m4v,.mov,.ogv" hidden>
+<input type="file" id="dirFallbackInput" webkitdirectory directory multiple accept="audio/*,video/*,.mp3,.m4a,.aac,.ogg,.oga,.opus,.wav,.flac,.webm,.aif,.aiff,.mp4,.m4v,.mov,.ogv" hidden>
 
 <script>
 "use strict";
@@ -1257,13 +1291,14 @@ const LS_BOOKMARKS="vibeplay.bookmarks.v1";
 const LS_RESUME="vibeplay.resume.v1";
 const DB_NAME="vibeplay";
 const DB_STORE="handles";
+const BACKUP_URL_KEY="backup:url";
 const HLS_CDN="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js";
 const MAX_PEAK_BYTES=6*1024*1024;
 const PEAK_CACHE_MAX=24;
 const PEAK_BUCKETS=720;
-const AUDIO_PICKER={
-description:"Audio files",
-accept:{"audio/*":[".mp3",".m4a",".aac",".ogg",".oga",".opus",".wav",".flac",".webm",".aif",".aiff"]}
+const MEDIA_PICKER={
+description:"Audio and video files",
+accept:{"audio/*":[".mp3",".m4a",".aac",".ogg",".oga",".opus",".wav",".flac",".webm",".aif",".aiff"],"video/*":[".mp4",".m4v",".mov",".webm",".ogv"]}
 };
 
 const $=s=>document.querySelector(s);
@@ -1339,7 +1374,7 @@ return new Promise(resolve=>{
 let done=false;
 let timer=null;
 const url=URL.createObjectURL(file);
-const el=new Audio();
+const el=isVideoFile(file)?document.createElement("video"):new Audio();
 const finish=value=>{
 if(done)return;
 done=true;
@@ -1939,6 +1974,89 @@ els.stagePoster.src=artUrl;
 els.stageCoverImg.poster=artUrl;
 els.stage.classList.add("has-art");
 els.stage.classList.toggle("has-video",streamVideoFor(src));
+syncStageFullscreen();
+}
+function stageFullscreenActive(){
+return document.fullscreenElement===els.stageCover||document.webkitFullscreenElement===els.stageCover;
+}
+function syncStageFullscreen(){
+const active=stageFullscreenActive();
+els.stage.classList.toggle("is-fullscreen",active);
+els.stageFs.innerHTML=active?ICON.collapse:ICON.expand;
+els.stageFs.title=active?"Exit fullscreen":"Fullscreen";
+els.stageFs.setAttribute("aria-label",active?"Exit fullscreen":"Fullscreen");
+els.stageFs.setAttribute("aria-pressed",active?"true":"false");
+if(els.stageCoverImg)els.stageCoverImg.controls=false;
+if(!active){
+hideFullscreenControls();
+stageFsWasActive=false;
+}else if(!stageFsWasActive){
+stageFsWasActive=true;
+showFullscreenControls(true);
+}
+renderFullscreenControls();
+}
+function renderFullscreenControls(){
+if(!els.stageFsPlay)return;
+const playing=!!state.playing&&!!audio;
+els.stageFsPlay.innerHTML=playing?ICON.pause:ICON.play;
+els.stageFsPlay.title=playing?"Pause":"Play";
+els.stageFsPlay.setAttribute("aria-label",playing?"Pause":"Play");
+if(els.stageFsVol){
+els.stageFsVol.value=String(Math.round(state.settings.volume*100));
+els.stageFsVol.style.setProperty("--fill",sliderFill(state.settings.volume));
+}
+if(els.stageFsVolVal)els.stageFsVolVal.textContent=state.settings.muted?"MUTE":Math.round(state.settings.volume*100)+"%";
+}
+function hideFullscreenControls(){
+clearTimeout(fsControlsTimer);
+fsControlsTimer=null;
+els.stageCover.classList.remove("fs-controls-on");
+}
+function scheduleFullscreenControlsHide(){
+clearTimeout(fsControlsTimer);
+fsControlsTimer=setTimeout(()=>{
+if(els.stageFsBar.matches(":focus-within")||els.stageFsBar.matches(":hover")){
+scheduleFullscreenControlsHide();
+return;
+}
+els.stageCover.classList.remove("fs-controls-on");
+fsControlsTimer=null;
+},2000);
+}
+function showFullscreenControls(autoHide){
+if(!stageFullscreenActive())return;
+clearTimeout(fsControlsTimer);
+els.stageCover.classList.add("fs-controls-on");
+if(autoHide)scheduleFullscreenControlsHide();
+}
+function toggleFullscreenControls(){
+if(!stageFullscreenActive())return;
+if(els.stageCover.classList.contains("fs-controls-on"))hideFullscreenControls();
+else showFullscreenControls(true);
+}
+async function toggleStageFullscreen(){
+if(stageFullscreenActive()){
+try{
+if(document.exitFullscreen)await document.exitFullscreen();
+else if(document.webkitExitFullscreen)document.webkitExitFullscreen();
+}catch(e){}
+return;
+}
+try{
+if(els.stageCover.requestFullscreen)await els.stageCover.requestFullscreen();
+else if(els.stageCover.webkitRequestFullscreen)els.stageCover.webkitRequestFullscreen();
+else if(streamVideoFor(currentSource())&&els.stageCoverImg&&els.stageCoverImg.webkitEnterFullscreen)els.stageCoverImg.webkitEnterFullscreen();
+else toast("Fullscreen is not supported in this browser");
+}catch(e){
+if(streamVideoFor(currentSource())&&els.stageCoverImg&&els.stageCoverImg.webkitEnterFullscreen){
+try{
+els.stageCoverImg.webkitEnterFullscreen();
+return;
+}catch(err){}
+}
+toast("Fullscreen is not available");
+}
 }
 function openStage(){
 if(!currentSource()){
@@ -1947,9 +2065,16 @@ return;
 }
 renderStage();
 els.stage.hidden=false;
+syncStageFullscreen();
 setTimeout(()=>els.stageClose.focus(),40);
 }
 function closeStage(){
+if(stageFullscreenActive()){
+try{
+if(document.exitFullscreen)document.exitFullscreen();
+else if(document.webkitExitFullscreen)document.webkitExitFullscreen();
+}catch(e){}
+}
 els.stage.hidden=true;
 els.stageBtn.focus();
 }
@@ -2836,6 +2961,75 @@ const date=backup.exportedAt?new Date(backup.exportedAt):null;
 const when=date&&!isNaN(date.getTime())?date.toLocaleString():"unknown date";
 return '<b>'+esc(fileName||"Backup")+'</b><br>'+esc(backup.sources.length+" sources")+" \u00b7 "+esc(local+" local")+" \u00b7 "+esc(folders+" folders")+" \u00b7 "+esc(urls+" streams")+"<br>"+esc(bm+" bookmarks")+" \u00b7 "+esc(resume+" resume points")+"<br><span style=\"color:#6f7b8e\">"+esc(when)+"</span>";
 }
+function isPastebinUrl(url){
+try{
+return /^(www\.)?pastebin\.com$/i.test(new URL(url).hostname);
+}catch(e){
+return false;
+}
+}
+function normalizeBackupUrl(value){
+const raw=String(value||"").trim();
+if(!isHttpUrl(raw))throw new Error("Enter a valid http(s) backup URL.");
+const url=new URL(raw);
+if(isPastebinUrl(url.href)){
+let id=url.searchParams.get("i")||"";
+if(!id){
+const match=url.pathname.match(/^\/(?:raw|dl)\/([a-z0-9]+)\/?$/i)||url.pathname.match(/^\/([a-z0-9]+)\/?$/i);
+if(match)id=match[1];
+}
+if(id)return "https://pastebin.com/raw/"+id;
+}
+return url.href;
+}
+async function fetchText(url,headers){
+const controller=new AbortController();
+const timer=setTimeout(()=>controller.abort(),20000);
+try{
+const response=await fetch(url,{cache:"no-store",credentials:"omit",headers,signal:controller.signal});
+if(!response.ok)throw new Error("HTTP "+response.status);
+return await response.text();
+}finally{
+clearTimeout(timer);
+}
+}
+async function fetchBackupText(url){
+if(isPastebinUrl(url)){
+try{
+return await fetchText("https://r.jina.ai/"+url,{"X-Respond-With":"text"});
+}catch(e){
+throw new Error("Unable to download the Pastebin backup. Check the link and try again.");
+}
+}
+try{
+return await fetchText(url);
+}catch(e){
+throw new Error("Unable to download the backup. The host must allow browser access (CORS).");
+}
+}
+async function rememberBackupUrl(url){
+try{
+await idbPut(BACKUP_URL_KEY,url);
+}catch(e){}
+}
+async function loadSavedBackupUrl(){
+try{
+const saved=await idbGet(BACKUP_URL_KEY);
+if(els.dataModal.hidden||typeof saved!=="string"||!saved)return;
+if(!els.dataUrl.value.trim())els.dataUrl.value=saved;
+}catch(e){}
+}
+function showBackupPreview(backup,label){
+pendingBackup=backup;
+overwriteArmed=false;
+els.dataSummary.innerHTML=backupSummary(backup,label);
+els.dataSummary.hidden=false;
+els.dataErr.hidden=true;
+els.dataMerge.hidden=false;
+els.dataOverwrite.hidden=false;
+els.dataOverwrite.textContent="OVERWRITE";
+els.dataOverwrite.classList.remove("armed");
+}
 function resetDataImport(clearFile){
 pendingBackup=null;
 overwriteArmed=false;
@@ -2846,12 +3040,15 @@ els.dataMerge.hidden=true;
 els.dataOverwrite.hidden=true;
 els.dataOverwrite.textContent="OVERWRITE";
 els.dataOverwrite.classList.remove("armed");
+els.dataFetch.disabled=false;
+els.dataFetch.textContent="FETCH BACKUP";
 if(clearFile)els.dataFile.value="";
 }
 function openData(){
 clearSeekHover();
 resetDataImport(true);
 els.dataModal.hidden=false;
+loadSavedBackupUrl();
 setTimeout(()=>els.dataExport.focus(),40);
 }
 function closeData(){
@@ -2878,20 +3075,40 @@ els.dataFile.value="";
 return;
 }
 try{
-const backup=parseBackup(await file.text());
-pendingBackup=backup;
-overwriteArmed=false;
-els.dataSummary.innerHTML=backupSummary(backup,file.name);
-els.dataSummary.hidden=false;
-els.dataErr.hidden=true;
-els.dataMerge.hidden=false;
-els.dataOverwrite.hidden=false;
-els.dataOverwrite.textContent="OVERWRITE";
-els.dataOverwrite.classList.remove("armed");
+showBackupPreview(parseBackup(await file.text()),file.name);
 }catch(e){
 showDataError(e&&e.message?e.message:"Unable to read the backup.");
 }
 els.dataFile.value="";
+}
+async function loadBackupFromUrl(){
+let url;
+try{
+url=normalizeBackupUrl(els.dataUrl.value);
+}catch(e){
+showDataError(e&&e.message?e.message:"Enter a valid backup URL.");
+els.dataUrl.focus();
+return;
+}
+els.dataErr.hidden=true;
+els.dataFetch.disabled=true;
+els.dataFetch.textContent="FETCHING…";
+await rememberBackupUrl(url);
+try{
+const text=await fetchBackupText(url);
+if(text.length>5*1024*1024)throw new Error("The backup is too large.");
+showBackupPreview(parseBackup(text),"Online · "+hostLabel(url));
+}catch(e){
+showDataError(e&&e.message?e.message:"Unable to fetch the backup.");
+}finally{
+els.dataFetch.disabled=false;
+els.dataFetch.textContent="FETCH BACKUP";
+}
+}
+function saveBackupUrlInput(){
+try{
+rememberBackupUrl(normalizeBackupUrl(els.dataUrl.value));
+}catch(e){}
 }
 function applyMerge(backup){
 const existing=new Set(state.sources.map(s=>s.id));
@@ -3035,7 +3252,9 @@ trash:'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="curre
 save:'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4V4Z"/></svg>',
 link:'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a4 4 0 0 0 5.6 0l2.4-2.4a4 4 0 1 0-5.6-5.6L11 6.4"/><path d="M14 11a4 4 0 0 0-5.6 0L6 13.4a4 4 0 1 0 5.6 5.6L13 17.6"/></svg>',
 exclude:'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 6.3A9.6 9.6 0 0 1 12 6c5.2 0 9 6 9 6a17 17 0 0 1-2.5 3.1"/><path d="M6.4 7.8A17 17 0 0 0 3 12s3.8 6 9 6a9.4 9.4 0 0 0 3.3-.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>',
-include:'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.8-6 10-6 10 6 10 6-3.8 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>'
+include:'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.8-6 10-6 10 6 10 6-3.8 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>',
+expand:'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/></svg>',
+collapse:'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h5V3M21 8h-5V3M16 21v-5h5M8 21v-5H3"/></svg>'
 };
 
 const state={
@@ -3065,6 +3284,8 @@ let sleepAtTrackEnd=false;
 let sleepTimeout=null;
 let pendingBackup=null;
 let overwriteArmed=false;
+let fsControlsTimer=null;
+let stageFsWasActive=false;
 
 const handles=new Map();
 const dirCache=new Map();
@@ -3201,6 +3422,12 @@ abClear:$("#abClear"),
 abErr:$("#abErr"),
 stage:$("#stage"),
 stageArt:$("#stageArt"),
+stageCover:$("#stageCover"),
+stageFs:$("#stageFs"),
+stageFsBar:$("#stageFsBar"),
+stageFsPlay:$("#stageFsPlay"),
+stageFsVol:$("#stageFsVol"),
+stageFsVolVal:$("#stageFsVolVal"),
 stageClose:$("#stageClose"),
 stagePoster:$("#stagePoster"),
 stageCoverImg:$("#stageCoverImg"),
@@ -3241,6 +3468,8 @@ dataClose:$("#dataClose"),
 dataExport:$("#dataExport"),
 dataFile:$("#dataFile"),
 dataPick:$("#dataPick"),
+dataUrl:$("#dataUrl"),
+dataFetch:$("#dataFetch"),
 dataSummary:$("#dataSummary"),
 dataErr:$("#dataErr"),
 dataMerge:$("#dataMerge"),
@@ -3459,7 +3688,7 @@ const msg=state.sources.length?"No source matches this filter.":"No sources yet.
 els.list.innerHTML='<div class="empty"><div class="empty-ico">&#9835;</div><div><b>'+
 (state.sources.length?"Nothing found":"Your queue is empty")+
 '</b><p>'+esc(msg)+'</p></div>'+
-(state.sources.length?'':'<button class="btn primary sm" type="button" data-add>ADD SOURCE</button><span class="empty-drop">or drop audio files/folders here</span>')+
+(state.sources.length?'':'<button class="btn primary sm" type="button" data-add>ADD SOURCE</button><span class="empty-drop">or drop audio/video files/folders here</span>')+
 '</div>';
 return;
 }
@@ -3472,8 +3701,8 @@ const folder=src.kind==="dir";
 const temp=src.saved===false;
 const excluded=src.excluded===true;
 const dirTrack=active&&folder?currentDirTrack(src):null;
-const label=folder?(dirTrack?tagLine(dirTrack.meta,dirTrack.name):(src.lastTrack?previewTrackName(src):"")):local?tagLine(src.meta,src.fileName||"Local audio"):hostLabel(src.url);
-const subTitle=folder?(dirTrack?tagDetail(dirTrack.meta,dirTrack.name):(src.lastTrack||"Folder")):local?tagDetail(src.meta,src.fileName||"Local audio"):src.url;
+const label=folder?(dirTrack?tagLine(dirTrack.meta,dirTrack.name):(src.lastTrack?previewTrackName(src):"")):local?tagLine(src.meta,src.fileName||"Local media"):hostLabel(src.url);
+const subTitle=folder?(dirTrack?tagDetail(dirTrack.meta,dirTrack.name):(src.lastTrack||"Folder")):local?tagDetail(src.meta,src.fileName||"Local media"):src.url;
 const dur=folder?(src.trackCount?String(src.trackCount).padStart(2,"0")+" TRK":""):(src.duration?fmtTime(src.duration):(local?"--:--":"STREAM"));
 const indicator=playing?
 '<span class="eq" aria-hidden="true"><b></b><b></b><b></b><b></b></span>':
@@ -3524,7 +3753,7 @@ box.classList.add("scrolling");
 }
 function fileFormatLabel(name){
 const ext=(String(name||"").split(".").pop()||"").toLowerCase();
-const map={mp3:"MP3",m4a:"M4A",aac:"AAC",ogg:"OGG",oga:"OGG",opus:"OPUS",wav:"WAV",flac:"FLAC",webm:"WEBM",aif:"AIFF",aiff:"AIFF"};
+const map={mp3:"MP3",m4a:"M4A",aac:"AAC",ogg:"OGG",oga:"OGG",opus:"OPUS",wav:"WAV",flac:"FLAC",webm:"WEBM",aif:"AIFF",aiff:"AIFF",mp4:"MP4",m4v:"M4V",mov:"MOV",ogv:"OGV"};
 return map[ext]||"AUDIO";
 }
 function sourceSize(src,dirTrack){
@@ -3580,7 +3809,7 @@ const video=streamVideoFor(src);
 if(video)fmt+=" · VIDEO";
 setText(els.dFmt,fmt);
 els.dFmt.classList.toggle("video",!!video);
-els.dFmt.title=video?"Video stream: audio only outside Now Playing, video in Now Playing":"";
+els.dFmt.title=video?"Video: audio only outside Now Playing, video in Now Playing":"";
 const size=sourceSize(src,dirTrack);
 setText(els.dSize,size?fmtBytes(size):"\u2014");
 setText(els.dBits,src?(state.live?"LIVE":fmtBitrate(size,duration)||"\u2014"):"\u2014");
@@ -3635,7 +3864,7 @@ subText=parts.join(" · ")||dirTrack.path||dirTrack.name;
 subText=src.trackCount?(src.trackCount+(src.trackCount===1?" track":" tracks")):"Folder";
 }else if(src.kind==="local"){
 const meta=src.meta||{};
-subText=tagMetaText(meta,nowTitle)||src.fileName||"Local audio file";
+subText=tagMetaText(meta,nowTitle)||src.fileName||"Local media file";
 subHtml=tagMetaMarkup(meta,nowTitle);
 }else{
 subText=streamMetaText(src)||src.url;
@@ -3698,6 +3927,7 @@ els.stagePrev.innerHTML=ICON.prev;
 els.stageNext.innerHTML=ICON.next;
 els.stagePlay.innerHTML=state.playing?ICON.pause:ICON.play;
 els.stagePlay.setAttribute("aria-label",state.playing?"Pause":"Play");
+renderFullscreenControls();
 els.repeat.innerHTML=state.settings.repeat==="one"?ICON.repeatOne:ICON.repeat;
 els.repeat.classList.toggle("on",state.settings.repeat!=="off");
 els.repeat.title="Repeat: "+(state.settings.repeat==="one"?"one track":state.settings.repeat==="all"?"all":"off");
@@ -3727,6 +3957,13 @@ applyRate();
 renderDisplay();
 }
 
+function setVolumePercent(value){
+state.settings.volume=clamp(parseFloat(value)/100,0,1);
+state.settings.muted=false;
+applyVolume();
+saveSettings();
+renderVolume();
+}
 function renderVolume(){
 const v=Math.round(state.settings.volume*100);
 els.vol.value=String(v);
@@ -3737,6 +3974,7 @@ els.mute.innerHTML=muted?ICON.volumeOff:ICON.volume;
 els.mute.classList.toggle("on",muted);
 els.mute.title=state.settings.muted?"Unmute":"Mute";
 els.mute.setAttribute("aria-label",state.settings.muted?"Unmute":"Mute");
+renderFullscreenControls();
 renderDisplay();
 }
 
@@ -3866,7 +4104,9 @@ applyPitch();
 function noteVideo(el){
 if(audio!==el||el.tagName!=="VIDEO")return;
 const src=currentSource();
-if(src&&src.kind==="url"&&el.videoWidth>0)markStreamVideo(src,true);
+if(!src)return;
+if(el.videoWidth>0&&el.videoHeight>0)markStreamVideo(src,true);
+else if(streamVideoFor(src))markStreamVideo(src,false);
 }
 function prepareMedia(el,onError){
 el.preload="auto";
@@ -4160,7 +4400,9 @@ toast("This source is no longer available.");
 return;
 }
 disposeAudio();
-const el=makeAudio(()=>{
+const el=isVideoFile(file)?makeVideo(()=>{
+if(token===playToken)toast("This file could not be played");
+}):makeAudio(()=>{
 if(token===playToken)toast("This file could not be played");
 });
 objectUrl=URL.createObjectURL(file);
@@ -4227,7 +4469,7 @@ for await(const child of handle.values()){
 if(child.kind==="file"){
 try{
 const file=await child.getFile();
-if(isAudioFile(file))tracks.push({file,path:prefix+file.name,name:file.name});
+if(isMediaFile(file))tracks.push({file,path:prefix+file.name,name:file.name});
 }catch(e){}
 }else if(child.kind==="directory"){
 tracks.push(...await readDirectoryTracks(child,prefix+child.name+"/"));
@@ -4240,7 +4482,7 @@ const tracks=[];
 if(entry.isFile){
 try{
 const file=await new Promise((resolve,reject)=>entry.file(resolve,reject));
-if(isAudioFile(file))tracks.push({file,path:(base||"")+file.name,name:file.name});
+if(isMediaFile(file))tracks.push({file,path:(base||"")+file.name,name:file.name});
 }catch(e){}
 }else if(entry.isDirectory){
 const reader=entry.createReader();
@@ -4307,7 +4549,7 @@ return;
 }
 if(token!==playToken)return;
 if(!tracks.length){
-toast("No audio tracks in this folder");
+toast("No audio or video tracks in this folder");
 state.dir={sourceId:src.id,tracks:[],index:-1,trackKey:null};
 render();
 return;
@@ -4348,10 +4590,10 @@ if(!src||src.kind!=="url")return null;
 return streamMeta&&streamMeta.srcId===src.id?streamMeta:null;
 }
 function streamVideoFor(src){
-return !!(src&&src.kind==="url"&&streamVideo&&streamVideo.srcId===src.id&&streamVideo.has);
+return !!(src&&streamVideo&&streamVideo.srcId===src.id&&streamVideo.has);
 }
 function markStreamVideo(src,has){
-if(!src||src.kind!=="url")return;
+if(!src)return;
 if(!has){
 if(!streamVideo||streamVideo.srcId!==src.id||!streamVideo.has)return;
 streamVideo={srcId:src.id,has:false};
@@ -5114,7 +5356,7 @@ els.fallbackInput.click();
 function pickFile(){
 return new Promise((resolve,reject)=>{
 if(window.showOpenFilePicker){
-window.showOpenFilePicker({multiple:false,types:[AUDIO_PICKER]}).then(async handlesList=>{
+window.showOpenFilePicker({multiple:false,types:[MEDIA_PICKER]}).then(async handlesList=>{
 const handle=handlesList[0];
 try{
 const file=await handle.getFile();
@@ -5260,7 +5502,7 @@ if(err&&(err.name==="AbortError"||err.message==="denied"))throw err;
 }
 const picked=await useFallbackDirPicker();
 const files=Array.from(picked.files||[]);
-const tracks=sortTracks(files.filter(isAudioFile).map(file=>({file,path:file.webkitRelativePath||file.name,name:file.name})));
+const tracks=sortTracks(files.filter(isMediaFile).map(file=>({file,path:file.webkitRelativePath||file.name,name:file.name})));
 const first=tracks[0];
 const name=first?String(first.path||"").split("/")[0]:"Folder";
 return {handle:null,name:name||"Folder",tracks};
@@ -5269,7 +5511,7 @@ async function chooseLocalFolder(){
 try{
 const picked=await pickDirectory();
 if(!picked.tracks.length){
-toast("No audio files in this folder");
+toast("No audio or video files in this folder");
 return;
 }
 pendingDir={handle:picked.handle,name:picked.name||"Folder",tracks:picked.tracks};
@@ -5321,7 +5563,7 @@ return;
 if(pendingDir){
 const tracks=pendingDir.tracks;
 if(!tracks.length){
-showAddErr("No audio files found in that folder.");
+showAddErr("No audio or video files found in that folder.");
 return;
 }
 const name=els.srcName.value.trim()||pendingDir.name;
@@ -5352,7 +5594,7 @@ toast("Playing without saving");
 return;
 }
 if(!pendingHandle&&!pendingFile){
-showAddErr("Choose an audio file or a folder.");
+showAddErr("Choose an audio/video file or a folder.");
 return;
 }
 let file=pendingFile;
@@ -5561,7 +5803,7 @@ if(src.kind==="dir"){
 try{
 const picked=await pickDirectory();
 if(!picked.tracks.length){
-toast("No audio files in that folder");
+toast("No audio or video files in that folder");
 return;
 }
 const payload=picked.handle||picked.tracks.map(track=>({file:track.file,path:track.path}));
@@ -5621,11 +5863,18 @@ toast("Could not relink this source");
 }
 }
 
-const AUDIO_DROP_RE=/\.(mp3|m4a|aac|ogg|oga|opus|wav|flac|webm|aif|aiff)$/i;
-function isAudioFile(file){
+const MEDIA_DROP_RE=/\.(mp3|m4a|aac|ogg|oga|opus|wav|flac|webm|aif|aiff|mp4|m4v|mov|ogv)$/i;
+const VIDEO_DROP_RE=/\.(mp4|m4v|mov|webm|ogv)$/i;
+function isMediaFile(file){
 if(!file)return false;
-if(file.type&&file.type.startsWith("audio/"))return true;
-return AUDIO_DROP_RE.test(file.name||"");
+if(file.type&&(file.type.startsWith("audio/")||file.type.startsWith("video/")))return true;
+return MEDIA_DROP_RE.test(file.name||"");
+}
+function isVideoFile(file){
+if(!file)return false;
+if(file.type&&file.type.startsWith("video/"))return true;
+if(file.type&&file.type.startsWith("audio/"))return false;
+return VIDEO_DROP_RE.test(file.name||"");
 }
 function uniqueSourceName(base){
 const clean=(base||"Local track").trim()||"Local track";
@@ -5716,11 +5965,11 @@ try{file=await handle.getFile();}catch(e){}
 if(!file&&webEntry&&webEntry.isFile){
 try{file=await new Promise((resolve,reject)=>webEntry.file(resolve,reject));}catch(e){file=null;}
 }
-if(!isAudioFile(file)){skipped++;continue;}
+if(!isMediaFile(file)){skipped++;continue;}
 resolved.push({type:"file",file,handle:handle&&handle.kind==="file"?handle:null});
 }
 if(!resolved.length){
-toast(skipped?"No playable audio or folders found":"No audio files or folders found");
+toast(skipped?"No playable audio or video files found":"No audio or video files or folders found");
 return;
 }
 openDropModal(resolved,skipped);
@@ -5797,7 +6046,7 @@ added++;
 continue;
 }
 const file=entry.file;
-if(!isAudioFile(file))continue;
+if(!isMediaFile(file))continue;
 const id=uid();
 const src={
 id,
@@ -5827,7 +6076,7 @@ renderList();
 loadMeta(src,file).then(()=>refreshSourceMeta(src));
 }
 if(!added){
-toast("No audio files found");
+toast("No audio or video files found");
 return;
 }
 if(save){
@@ -5880,6 +6129,8 @@ saveActiveResume(true);
 
 function init(){
 els.openAdd.innerHTML=ICON.plus;
+els.stageFs.innerHTML=ICON.expand;
+els.stageFs.setAttribute("aria-pressed","false");
 if(state.settings.lastId&&getSource(state.settings.lastId))state.currentId=state.settings.lastId;
 if(!state.sources.length)state.currentId=null;
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
@@ -6029,6 +6280,19 @@ startVoice();
 });
 els.stageBtn.addEventListener("click",openStage);
 els.stageClose.addEventListener("click",closeStage);
+els.stageFs.addEventListener("click",toggleStageFullscreen);
+els.stageCover.addEventListener("click",event=>{
+if(event.target.closest(".stage-fs,.stage-fsbar"))return;
+toggleFullscreenControls();
+});
+els.stageFsPlay.addEventListener("click",togglePlay);
+els.stageFsVol.addEventListener("input",()=>setVolumePercent(els.stageFsVol.value));
+els.stageFsBar.addEventListener("pointerdown",()=>showFullscreenControls(false));
+els.stageFsBar.addEventListener("pointerup",()=>showFullscreenControls(true));
+els.stageFsBar.addEventListener("focusin",()=>showFullscreenControls(false));
+els.stageFsBar.addEventListener("focusout",()=>showFullscreenControls(true));
+document.addEventListener("fullscreenchange",syncStageFullscreen);
+document.addEventListener("webkitfullscreenchange",syncStageFullscreen);
 els.stagePrev.addEventListener("click",prevTrack);
 els.stageNext.addEventListener("click",()=>nextTrack(false));
 els.stagePlay.addEventListener("click",togglePlay);
@@ -6089,6 +6353,14 @@ els.dataCancel.addEventListener("click",closeData);
 els.dataExport.addEventListener("click",exportBackup);
 els.dataPick.addEventListener("click",()=>els.dataFile.click());
 els.dataFile.addEventListener("change",loadBackupFile);
+els.dataFetch.addEventListener("click",loadBackupFromUrl);
+els.dataUrl.addEventListener("keydown",event=>{
+if(event.key==="Enter"){
+event.preventDefault();
+loadBackupFromUrl();
+}
+});
+els.dataUrl.addEventListener("blur",saveBackupUrlInput);
 els.dataMerge.addEventListener("click",()=>{
 if(pendingBackup)applyMerge(pendingBackup);
 });
@@ -6107,13 +6379,7 @@ els.dataModal.addEventListener("click",event=>{
 if(event.target===els.dataModal)closeData();
 });
 
-els.vol.addEventListener("input",()=>{
-state.settings.volume=clamp(parseFloat(els.vol.value)/100,0,1);
-state.settings.muted=false;
-applyVolume();
-saveSettings();
-renderVolume();
-});
+els.vol.addEventListener("input",()=>setVolumePercent(els.vol.value));
 
 els.search.addEventListener("input",()=>{
 state.filter=els.search.value;
@@ -6414,6 +6680,11 @@ return !!(target&&target.closest&&target.closest('input[type="range"]'));
 document.addEventListener("keydown",event=>{
 const modalOpen=anyModalOpen();
 if(event.key==="Escape"){
+if(stageFullscreenActive()){
+event.preventDefault();
+toggleStageFullscreen();
+return;
+}
 if(!els.addModal.hidden)closeAdd();
 if(!els.renameModal.hidden)closeRename();
 if(!els.dropModal.hidden)closeDropModal();
