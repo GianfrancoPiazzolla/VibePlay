@@ -1185,10 +1185,10 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 <div class="data-url">
 <div class="field">
 <label for="dataUrl">Backup URL</label>
-<input id="dataUrl" type="url" placeholder="https://pastebin.com/raw/…" spellcheck="false" autocomplete="off">
+<input id="dataUrl" type="url" placeholder="https://pastebin.com/raw/… or https://tinyurl.com/…" spellcheck="false" autocomplete="off">
 </div>
 <button class="btn data-pick" id="dataFetch" type="button">FETCH BACKUP</button>
-<p class="hint">Pastebin links are converted to raw automatically. The URL is saved on this device for the next import.</p>
+<p class="hint">Pastebin and TinyURL links use a public fallback for CORS. The URL is saved on this device for the next import.</p>
 </div>
 <div class="data-summary" id="dataSummary" hidden></div>
 <p class="form-err" id="dataErr" hidden></p>
@@ -2968,6 +2968,37 @@ return /^(www\.)?pastebin\.com$/i.test(new URL(url).hostname);
 return false;
 }
 }
+function isTinyUrl(url){
+try{
+return /^(www\.)?tinyurl\.com$/i.test(new URL(url).hostname);
+}catch(e){
+return false;
+}
+}
+function tinyUrlRedirectTarget(html){
+const metas=String(html||"").match(/<meta\b[^>]*>/gi)||[];
+for(const tag of metas){
+if(!/http-equiv\s*=\s*["']?refresh/i.test(tag))continue;
+const content=tag.match(/content\s*=\s*["']([^"']+)["']/i);
+if(!content)continue;
+const target=content[1].match(/url\s*=\s*(.+)$/i);
+if(!target)continue;
+try{
+const destination=new URL(target[1].trim());
+if(destination.protocol==="http:"||destination.protocol==="https:")return destination.href;
+}catch(e){}
+}
+return "";
+}
+async function fetchTinyUrlText(url){
+const first=await fetchText("https://r.jina.ai/"+url,{"X-Respond-With":"text"});
+const trimmed=first.trim();
+if(trimmed.startsWith("{")||trimmed.startsWith("["))return first;
+const html=await fetchText("https://r.jina.ai/"+url,{"X-Return-Format":"html"});
+const destination=tinyUrlRedirectTarget(html);
+if(!destination)return first;
+return await fetchText("https://r.jina.ai/"+destination,{"X-Respond-With":"text"});
+}
 function normalizeBackupUrl(value){
 const raw=String(value||"").trim();
 if(!isHttpUrl(raw))throw new Error("Enter a valid http(s) backup URL.");
@@ -2994,6 +3025,13 @@ clearTimeout(timer);
 }
 }
 async function fetchBackupText(url){
+if(isTinyUrl(url)){
+try{
+return await fetchTinyUrlText(url);
+}catch(e){
+throw new Error("Unable to download the TinyURL backup. Check the link and try again.");
+}
+}
 if(isPastebinUrl(url)){
 try{
 return await fetchText("https://r.jina.ai/"+url,{"X-Respond-With":"text"});
