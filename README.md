@@ -39,9 +39,9 @@
 
 ## 🌟 What is VibePlay?
 
-VibePlay is a **single-page media player** that runs entirely in your browser. Load a local audio or video file, a whole folder, or a direct stream URL, give each one a **reference name**, and it becomes a reusable *source* in your personal library. Build a queue, reorder it by drag & drop, skip what you don't want, and keep listening with shuffle, repeat, bookmarks, resume points, a sleep timer and variable playback speed.
+VibePlay is a **single-page media player** that runs entirely in your browser. Load a local audio or video file, a whole folder, or a direct stream URL (audio, video or IPTV), give each one a **reference name**, and it becomes a reusable *source* in your personal library (see [Supported Sources](#-supported-sources)). Build a queue, reorder it by drag & drop, skip what you don't want, and keep listening/watching with shuffle, repeat, bookmarks, resume points, a sleep timer and variable playback speed.
 
-> 🎧 **Audiobook-first by design.** Long narrations, books split into dozens of files, chapters to revisit and sessions that end with you falling asleep — those are the needs VibePlay was built around.
+> 🎧 **Audiobook-first by design.** Long narrations, books split into dozens of files, chapters to revisit and sessions that end with you falling asleep — those are the needs VibePlay was built around. But that’s not all.
 
 > 🛡️ **Nothing is uploaded.** Media never leaves your device: the app only stores source metadata, settings, bookmarks and resume positions inside your browser.
 
