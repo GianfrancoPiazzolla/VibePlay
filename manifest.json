@@ -1,7 +1,7 @@
 {
   "name": "VibePlay",
   "short_name": "VibePlay",
-  "description": "A full-featured local/online PWA player",
+  "description": "A full-featured local/online PWA media player",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
