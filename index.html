@@ -92,8 +92,9 @@ width:28px;height:28px;border-radius:8px;display:grid;place-items:center;
 background:linear-gradient(#232833,#181b22);border:1px solid #2d3340;color:#aab4c5;
 cursor:pointer;padding:0;transition:border-color .12s,color .12s,background .12s;
 }
-.icon-btn:hover{border-color:#414a5c;color:#fff}
+.icon-btn:hover{border-color:#1f4b57;color:#fff}
 .icon-btn.on{color:var(--accent);border-color:#1f4b57;background:#0b2027;box-shadow:0 0 12px #22d3ee2e}
+.icon-btn.on:hover{color:var(--accent2);border-color:#1f4b57;background:#0b2027;box-shadow:0 0 12px #22d3ee2e}
 .layout{
 display:grid;grid-template-columns:352px minmax(0,1fr);gap:12px;flex:1;min-height:0;
 }
@@ -672,7 +673,9 @@ letter-spacing:.08em;padding:5px 9px;border-radius:12px;cursor:pointer;flex:none
 .stage-cover:fullscreen,.stage-cover:-webkit-full-screen{width:100%;height:100%;border:0;border-radius:0;background:#000;box-shadow:none}
 .stage-cover:fullscreen img,.stage-cover:fullscreen video,.stage-cover:-webkit-full-screen img,.stage-cover:-webkit-full-screen video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 .stage-cover:fullscreen>svg,.stage-cover:-webkit-full-screen>svg{display:none}
-.stage-cover:fullscreen .stage-fs,.stage-cover:-webkit-full-screen .stage-fs{top:14px;right:14px;width:40px;height:40px;opacity:1}
+.stage-cover:fullscreen .stage-fs,.stage-cover:-webkit-full-screen .stage-fs{top:14px;right:14px;width:40px;height:40px;opacity:.10;pointer-events:none;transition:opacity .25s}
+.stage-cover.fs-controls-on .stage-fs{opacity:.96;pointer-events:auto}
+.stage-cover:fullscreen .stage-fs:hover,.stage-cover:-webkit-full-screen .stage-fs:hover,.stage-cover:fullscreen .stage-fs:focus-visible,.stage-cover:-webkit-full-screen .stage-fs:focus-visible{opacity:1;pointer-events:auto}
 .stage-fsbar{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:4;display:none;align-items:center;gap:9px;max-width:calc(100% - 28px);padding:6px 10px;border:1px solid #ffffff24;border-radius:var(--r-pill);background:#05080ccc;backdrop-filter:blur(10px);opacity:.10;pointer-events:none;transition:opacity .25s}
 .stage-cover.fs-controls-on .stage-fsbar,.stage-fsbar:focus-within{opacity:.96;pointer-events:auto}
 .stage-fsbar:hover{opacity:1}
@@ -2016,7 +2019,7 @@ els.stageCover.classList.remove("fs-controls-on");
 function scheduleFullscreenControlsHide(){
 clearTimeout(fsControlsTimer);
 fsControlsTimer=setTimeout(()=>{
-if(els.stageFsBar.matches(":focus-within")||els.stageFsBar.matches(":hover")){
+if(els.stageFsBar.matches(":focus-within")||els.stageFsBar.matches(":hover")||els.stageFs.matches(":focus-visible")||els.stageFs.matches(":hover")){
 scheduleFullscreenControlsHide();
 return;
 }
@@ -6349,6 +6352,10 @@ startVoice();
 els.stageBtn.addEventListener("click",openStage);
 els.stageClose.addEventListener("click",closeStage);
 els.stageFs.addEventListener("click",toggleStageFullscreen);
+els.stageFs.addEventListener("pointerdown",()=>showFullscreenControls(false));
+els.stageFs.addEventListener("pointerup",()=>showFullscreenControls(true));
+els.stageFs.addEventListener("focusin",()=>showFullscreenControls(false));
+els.stageFs.addEventListener("focusout",()=>showFullscreenControls(true));
 els.stageCover.addEventListener("click",event=>{
 if(event.target.closest(".stage-fs,.stage-fsbar"))return;
 toggleFullscreenControls();
